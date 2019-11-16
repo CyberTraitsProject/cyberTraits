@@ -4,12 +4,9 @@ import os
 from date_time import *
 import numpy as np
 
-
-
 avr_and_sd_dic = {'night':      {'average': 0, 'sd': 0},
                   'day':        {'average': 0, 'sd': 0},
                   'evening':    {'average': 0, 'sd': 0}}
-
 
 
 def calc_avr_and_sd_on_dic(data_dic):
