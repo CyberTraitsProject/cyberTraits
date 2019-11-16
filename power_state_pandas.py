@@ -1,5 +1,6 @@
 import pandas as pd
 import os, datetime
+import numpy as np
 
 #class DAY_TIMES(Enum):
 START_DAY = datetime.datetime(1, 1, 1, 9, 0, 0, 0)          # calculate by UTC. TODO - to match it to the real time in Israel - 09:00
@@ -17,6 +18,9 @@ POWER_STATE_NAME_COLUMN = 2
 
 power_states_data_dic = {}
 
+avr_and_sd_dic = {'night':      {'num_times': {'average': 0, 'sd': 0}, 'sum_time': {'average': 0, 'sd': 0}},
+                  'day':        {'num_times': {'average': 0, 'sd': 0}, 'sum_time': {'average': 0, 'sd': 0}},
+                  'evening':    {'num_times': {'average': 0, 'sd': 0}, 'sum_time': {'average': 0, 'sd': 0}}}
 
 def get_date_time_from_str(str):
     return datetime.datetime.strptime(str, '%Y-%m-%dT%H:%M:%S.%f')
@@ -82,6 +86,32 @@ def update_durations_in_power_states_data_dic(start_date_time, durations_list):
         i += 1
 
 
+def calc_avr_and_sd_on_dic():
+    array_list = [[[],[]], [[],[]], [[],[]]]  # [[[night_num_times],[night_sum_times]], [[day_num_times],[day_sum_times]], [[[evening_num_times],[evening_sum_times]]]]
+    for date in power_states_data_dic:
+        array_list[0][0].append(power_states_data_dic[date]['night']['num_times'])
+        array_list[0][1].append(power_states_data_dic[date]['night']['sum_time'])
+        array_list[1][0].append(power_states_data_dic[date]['day']['num_times'])
+        array_list[1][1].append(power_states_data_dic[date]['day']['sum_time'])
+        array_list[2][0].append(power_states_data_dic[date]['evening']['num_times'])
+        array_list[2][1].append(power_states_data_dic[date]['evening']['sum_time'])
+    avr_and_sd_dic['night']['num_times']['average'] = np.array(array_list[0][0]).mean()
+    avr_and_sd_dic['night']['sum_time']['average'] = np.array(array_list[0][1]).mean()
+    avr_and_sd_dic['night']['num_times']['sd'] = np.array(array_list[0][0]).std()
+    avr_and_sd_dic['night']['sum_time']['sd'] = np.array(array_list[0][1]).std()
+    avr_and_sd_dic['day']['num_times']['average'] = np.array(array_list[1][0]).mean()
+    avr_and_sd_dic['day']['sum_time']['average'] = np.array(array_list[1][1]).mean()
+    avr_and_sd_dic['day']['num_times']['sd'] = np.array(array_list[1][0]).std()
+    avr_and_sd_dic['day']['sum_time']['sd'] = np.array(array_list[1][1]).std()
+    avr_and_sd_dic['evening']['num_times']['average'] = np.array(array_list[2][0]).mean()
+    avr_and_sd_dic['evening']['sum_time']['average'] = np.array(array_list[2][1]).mean()
+    avr_and_sd_dic['evening']['num_times']['sd'] = np.array(array_list[2][0]).std()
+    avr_and_sd_dic['evening']['sum_time']['sd'] = np.array(array_list[2][1]).std()
+
+    print(array_list)
+    print(avr_and_sd_dic)
+
+
 def organize_data(path_dir, power_state_file, last_on_power_state_date):
     file_date = str(power_state_file).split(" ")[0]
     if file_date not in power_states_data_dic:
@@ -121,7 +151,7 @@ def power_state_main(power_state_dir):
     for curr_power_state_file in os.listdir(power_state_dir):
         last_on_power_state_date = organize_data(power_state_dir, curr_power_state_file, returned_value)
         returned_value = last_on_power_state_date
-
+    calc_avr_and_sd_on_dic()
     print(power_states_data_dic)
 
 
