@@ -79,7 +79,7 @@ def calc_avr_and_sd_on_dic():
     print(avr_and_sd_dic)
 
 
-def organize_data(path_dir, accelerometer_file, last_on_accelerometer_date):
+def organize_data(path_dir, accelerometer_file):
     file_date = str(accelerometer_file).split(" ")[0]
     if file_date not in accelerometer_data_dic:
         accelerometer_data_dic[file_date] = []
@@ -97,14 +97,16 @@ def organize_data(path_dir, accelerometer_file, last_on_accelerometer_date):
     curr_date_time = get_date_time_from_UTC_time(UTC_times_list[curr_line_index])
     for i in range(60):
         for j in range(60):
-            if curr_date_time.minute != i or curr_date_time.second != j:
+            if (curr_date_time.minute != i or curr_date_time.second != j) or curr_line_index + 1 == len(UTC_times_list):    # the curr time is more or little then the wanted time, or we finished all the lines in the file --> there is a need to fulfill the values with 0,0,0
                 x_y_z_list_for_hour.append([0, 0, 0])
-                if curr_date_time.minute > i or (curr_date_time.minute == i and curr_date_time.second > j):     # the wanted time is less then the current UTC_time TODO: if the file finished
-                    continue
+                #if curr_line_index + 1 == len(UTC_times_list):     # we finished all the lines in the file. now there is a need to fullfill the rest seconds with 0,0,0
+                continue
             else:
                 x_y_z_list_for_hour.append([x_list[curr_line_index], y_list[curr_line_index], z_list[curr_line_index]])
-            curr_line_index += 1
-
+                while curr_date_time.minute == i and curr_date_time.second <= j and curr_line_index +1 != len(UTC_times_list):
+                    curr_line_index += 1
+                    curr_date_time = get_date_time_from_UTC_time(UTC_times_list[curr_line_index])
+    print(x_y_z_list_for_hour)
     """for i, accelerometer in enumerate(accelerometer_list):
         if accelerometer == OFF and last_on_accelerometer_date:
             on_time = get_date_time_from_UTC_time(last_on_accelerometer_date)
@@ -130,9 +132,9 @@ def accelerometer_main(accelerometer_dir):
         exit(1)
     for curr_accelerometer_file in os.listdir(accelerometer_dir):
         organize_data(accelerometer_dir, curr_accelerometer_file)
-    calc_avr_and_sd_on_dic()
-    print(accelerometer_data_dic)
+    #calc_avr_and_sd_on_dic()
+    #print(accelerometer_data_dic)
 
 
 if __name__ == "__main__":
-    accelerometer_main("C:/Users/yafitsn/PycharmProjects/Project/data/1q9fj13m/accelerometer")
+    accelerometer_main("C:/Users/orana/PycharmProjects/Project/data/1q9fj13m/accelerometer/accelerometer")

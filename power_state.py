@@ -56,6 +56,7 @@ def update_durations_in_power_states_data_dic(start_date_time, durations_list):
     while i < len(durations_list):
         power_states_data_dic[cur_date][part_of_day]['num_times'] += 1
         power_states_data_dic[cur_date][part_of_day]['sum_time'] += durations_list[i]
+        print(durations_list[i])
         part_of_day = get_next_day_time(start_date_time)
         if part_of_day == 'night':
             start_date_time += datetime.timedelta(days=1)
@@ -102,7 +103,10 @@ def organize_data(path_dir, power_state_file, last_on_power_state_date):
     UTC_times_list = power_states_df['UTC time']
 
     for i, power_state in enumerate(power_states_list):
-        if power_state == OFF and last_on_power_state_date:
+        if power_state == ON and last_on_power_state_date:  # error date from the app
+            last_on_power_state_date = None
+            continue
+        elif power_state == OFF and last_on_power_state_date:
             on_time = get_date_time_from_UTC_time(last_on_power_state_date)
             off_time = get_date_time_from_UTC_time(UTC_times_list[i])
             last_on_power_state_date = None
@@ -122,7 +126,7 @@ def organize_data(path_dir, power_state_file, last_on_power_state_date):
 
 def power_state_main(power_state_dir):
     if not os.path.isdir(power_state_dir):
-        print("Directory", power_state_dir, "not exists")
+        print("Directory '", power_state_dir, "' not exists")
         exit(1)
     returned_value = None
     for curr_power_state_file in os.listdir(power_state_dir):
@@ -133,18 +137,7 @@ def power_state_main(power_state_dir):
 
 
 if __name__ == "__main__":
-    power_state_main("C:/Users/yafitsn/PycharmProjects/Project/data/1q9fj13m/power_state")
-
-
-
-
-
-
-
-
-
-
-
+    power_state_main("C:/Users/orana/PycharmProjects/project/data/1q9fj13m/power_state")
 
 
 
