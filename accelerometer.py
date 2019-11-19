@@ -18,71 +18,50 @@ import os
 from date_time import *
 import numpy as np
 
-
-accelerometer_data_dic = {}
-
-avr_and_sd_dic = {'night':      {'num_times': {'average': 0, 'sd': 0}, 'sum_time': {'average': 0, 'sd': 0}},
-                  'day':        {'num_times': {'average': 0, 'sd': 0}, 'sum_time': {'average': 0, 'sd': 0}},
-                  'evening':    {'num_times': {'average': 0, 'sd': 0}, 'sum_time': {'average': 0, 'sd': 0}}}
+N = 60 * 60 # 60 minutes * 60 seconds
 
 
-def get_list_of_power_on_durations(on_time, off_time):
-    durations_list = []
-    while get_part_of_day(on_time) != get_part_of_day(off_time) or on_time.date() != off_time.date():   # the on and the off time are in different dates or in different parts of days
-        next_time = get_next_part_of_day_start_time(on_time)
-        next_on_date_time = get_next_date_for_next_time(on_time, next_time)
-        duration = (next_on_date_time - on_time).total_seconds() / 60
-        durations_list.append(duration)
-        on_time = next_on_date_time
-    duration = (off_time - on_time).total_seconds() / 60
-    durations_list.append(duration)
-    return durations_list
+accelerometer_data_dic = {0: [],   1: [],     2: [],     3: [],     4: [],     5: [],
+                          6: [],   7: [],     8: [],     9: [],     10: [],    11: [],
+                          12: [],  13: [],    14: [],    15: [],    16: [],    17: [],
+                          18: [],  19: [],    20: [],    21: [],    22: [],    23: []}
+
+avr_MAD_dic = {0: 0,   1: 0,     2: 0,     3: 0,     4: 0,     5: 0,
+               6: 0,   7: 0,     8: 0,     9: 0,     10: 0,    11: 0,
+               12: 0,  13: 0,    14: 0,    15: 0,    16: 0,    17: 0,
+               18: 0,  19: 0,    20: 0,    21: 0,    22: 0,    23: 0}
 
 
-def update_durations_in_accelerometer_data_dic(start_date_time, durations_list):
-    part_of_day = get_part_of_day(start_date_time)
-    cur_date = str(start_date_time.date())
-    i = 0
-    while i < len(durations_list):
-        accelerometer_data_dic[cur_date][part_of_day]['num_times'] += 1
-        accelerometer_data_dic[cur_date][part_of_day]['sum_time'] += durations_list[i]
-        part_of_day = get_next_day_time(start_date_time)
-        if part_of_day == 'night':
-            start_date_time += datetime.timedelta(days=1)
-            cur_date = str(start_date_time.date())
-        i += 1
+def calc_MAD_avg_for_hour_in_dic():
+    for hour, MAD_arr in accelerometer_data_dic.items():
+        if len(MAD_arr) == 0:
+            avr_MAD_dic[hour] = 0
+        else:
+            avr_MAD_dic[hour] = np.average(MAD_arr)
+    print(avr_MAD_dic)
 
 
-def calc_avr_and_sd_on_dic():
-    array_list = [[[],[]], [[],[]], [[],[]]]  # [[[night_num_times],[night_sum_times]], [[day_num_times],[day_sum_times]], [[[evening_num_times],[evening_sum_times]]]]
-    for date in accelerometer_data_dic:
-        array_list[0][0].append(accelerometer_data_dic[date]['night']['num_times'])
-        array_list[0][1].append(accelerometer_data_dic[date]['night']['sum_time'])
-        array_list[1][0].append(accelerometer_data_dic[date]['day']['num_times'])
-        array_list[1][1].append(accelerometer_data_dic[date]['day']['sum_time'])
-        array_list[2][0].append(accelerometer_data_dic[date]['evening']['num_times'])
-        array_list[2][1].append(accelerometer_data_dic[date]['evening']['sum_time'])
-    avr_and_sd_dic['night']['num_times']['average']     = np.array(array_list[0][0]).mean()
-    avr_and_sd_dic['night']['sum_time']['average']      = np.array(array_list[0][1]).mean()
-    avr_and_sd_dic['night']['num_times']['sd']          = np.array(array_list[0][0]).std()
-    avr_and_sd_dic['night']['sum_time']['sd']           = np.array(array_list[0][1]).std()
-    avr_and_sd_dic['day']['num_times']['average']       = np.array(array_list[1][0]).mean()
-    avr_and_sd_dic['day']['sum_time']['average']        = np.array(array_list[1][1]).mean()
-    avr_and_sd_dic['day']['num_times']['sd']            = np.array(array_list[1][0]).std()
-    avr_and_sd_dic['day']['sum_time']['sd']             = np.array(array_list[1][1]).std()
-    avr_and_sd_dic['evening']['num_times']['average']   = np.array(array_list[2][0]).mean()
-    avr_and_sd_dic['evening']['sum_time']['average']    = np.array(array_list[2][1]).mean()
-    avr_and_sd_dic['evening']['num_times']['sd']        = np.array(array_list[2][0]).std()
-    avr_and_sd_dic['evening']['sum_time']['sd']         = np.array(array_list[2][1]).std()
+def get_ri(x_y_z_arr):     # the accelerometer result in time i
+    return pow((pow(x_y_z_arr[0], 2) + pow(x_y_z_arr[1], 2) + pow(x_y_z_arr[2], 2)), -2)   # (x^2 + y^2 + z^2)^-2
 
-    print(array_list)
-    print(avr_and_sd_dic)
+
+def calculate_average(x_y_z_list_for_hour):
+    ri_arr = [get_ri(x_y_z) for x_y_z in x_y_z_list_for_hour]
+    r_avg = 1/N * sum(ri_arr)
+    return ri_arr, r_avg
+
+
+def calculate_MAD(x_y_z_list_for_hour):
+    ri_arr, r_avg = calculate_average(x_y_z_list_for_hour)
+    dis_arr = [np.abs(ri - r_avg) for ri in ri_arr]
+    MAD = 1/N * sum(dis_arr)
+    return MAD
 
 
 def organize_data(path_dir, accelerometer_file):
-    file_date = str(accelerometer_file).split(" ")[0]
+    """file_date = str(accelerometer_file).split(" ")[0]
     if file_date not in accelerometer_data_dic:
-        accelerometer_data_dic[file_date] = []
+        accelerometer_data_dic[file_date] = []"""
 
     accelerometer_df = pd.read_csv(os.path.join(path_dir, accelerometer_file), usecols=['UTC time', 'x', 'y', 'z'])
 
@@ -98,32 +77,16 @@ def organize_data(path_dir, accelerometer_file):
     for i in range(60):
         for j in range(60):
             if (curr_date_time.minute != i or curr_date_time.second != j) or curr_line_index + 1 == len(UTC_times_list):    # the curr time is more or little then the wanted time, or we finished all the lines in the file --> there is a need to fulfill the values with 0,0,0
-                x_y_z_list_for_hour.append([0, 0, 0])
+                #x_y_z_list_for_hour.append([0, 0, 0])
                 #if curr_line_index + 1 == len(UTC_times_list):     # we finished all the lines in the file. now there is a need to fullfill the rest seconds with 0,0,0
                 continue
             else:
                 x_y_z_list_for_hour.append([x_list[curr_line_index], y_list[curr_line_index], z_list[curr_line_index]])
-                while curr_date_time.minute == i and curr_date_time.second <= j and curr_line_index +1 != len(UTC_times_list):
+                while curr_date_time.minute == i and curr_date_time.second <= j and curr_line_index + 1 != len(UTC_times_list):
                     curr_line_index += 1
                     curr_date_time = get_date_time_from_UTC_time(UTC_times_list[curr_line_index])
-    print(x_y_z_list_for_hour)
-    """for i, accelerometer in enumerate(accelerometer_list):
-        if accelerometer == OFF and last_on_accelerometer_date:
-            on_time = get_date_time_from_UTC_time(last_on_accelerometer_date)
-            off_time = get_date_time_from_UTC_time(UTC_times_list[i])
-            last_on_accelerometer_date = None
-        elif accelerometer == ON:
-            on_time = get_date_time_from_UTC_time(UTC_times_list[i])
-            if i + 1 < len(accelerometer_list):
-                off_time = get_date_time_from_UTC_time(UTC_times_list[i+1])
-            else:    # reached to the EOF
-                last_on_accelerometer_date = UTC_times_list[i]
-                return last_on_accelerometer_date
-        else:
-            continue
-        durations_list = get_list_of_power_on_durations(on_time, off_time)
-        update_durations_in_accelerometer_data_dic(on_time, durations_list)
-    return None"""
+    MAD = calculate_MAD(x_y_z_list_for_hour)
+    accelerometer_data_dic[curr_date_time.hour].append(MAD)
 
 
 def accelerometer_main(accelerometer_dir):
@@ -132,9 +95,10 @@ def accelerometer_main(accelerometer_dir):
         exit(1)
     for curr_accelerometer_file in os.listdir(accelerometer_dir):
         organize_data(accelerometer_dir, curr_accelerometer_file)
-    #calc_avr_and_sd_on_dic()
+    calc_MAD_avg_for_hour_in_dic()
+    print(accelerometer_data_dic)
     #print(accelerometer_data_dic)
 
 
 if __name__ == "__main__":
-    accelerometer_main("C:/Users/orana/PycharmProjects/Project/data/1q9fj13m/accelerometer/accelerometer")
+    accelerometer_main("C:/Users/orana/PycharmProjects/Project/data/1q9fj13m/accelerometer")
