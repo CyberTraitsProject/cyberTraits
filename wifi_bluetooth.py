@@ -4,14 +4,15 @@ import os
 from date_time import *
 import numpy as np
 
-avr_and_sd_dic = {'night':      {'average': 0, 'sd': 0},
-                  'day':        {'average': 0, 'sd': 0},
-                  'evening':    {'average': 0, 'sd': 0}}
+
 
 
 def calc_avr_and_sd_on_dic(data_dic):
     array_list = [[], [], []]  # [[night_num_times], [day_num_times], [evening_num_times]]
-    for date in data_dic:
+    avr_and_sd_dic = {'night':      {'average': 0, 'sd': 0},
+						'day':        {'average': 0, 'sd': 0},
+						'evening':    {'average': 0, 'sd': 0}}
+	for date in data_dic:
         array_list[0].append(len(data_dic[date]['night']))
         array_list[1].append(len(data_dic[date]['day']))
         array_list[2].append(len(data_dic[date]['evening']))
@@ -24,6 +25,7 @@ def calc_avr_and_sd_on_dic(data_dic):
 
     print(array_list)
     print(avr_and_sd_dic)
+	return avr_and_sd_dic
 
 
 def organize_data(path_dir, wifi_file, data_dic):

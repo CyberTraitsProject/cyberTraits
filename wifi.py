@@ -25,10 +25,7 @@ def wifi_main(wifi_dir):
         exit(1)
     for curr_wifi_file in os.listdir(wifi_dir):
         organize_data(wifi_dir, curr_wifi_file, wifi_data_dic)
-    calc_avr_and_sd_on_dic(wifi_data_dic)
+    avr_and_sd_dic = calc_avr_and_sd_on_dic(wifi_data_dic)
     #print(wifi_data_dic)
-
-
-if __name__ == "__main__":
-    wifi_main("C:/Users/yafitsn/PycharmProjects/Project/data/1q9fj13m/wifi")
+	return avr_and_sd_dic
 

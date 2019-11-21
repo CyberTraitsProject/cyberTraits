@@ -107,6 +107,7 @@ def organize_data(path_dir, accelerometer_file):
                     curr_line_index += 1
                     curr_date_time = get_date_time_from_UTC_time(UTC_times_list[curr_line_index])
     print(x_y_z_list_for_hour)
+	return avr_and_sd_dic
     """for i, accelerometer in enumerate(accelerometer_list):
         if accelerometer == OFF and last_on_accelerometer_date:
             on_time = get_date_time_from_UTC_time(last_on_accelerometer_date)
@@ -135,6 +136,3 @@ def accelerometer_main(accelerometer_dir):
     #calc_avr_and_sd_on_dic()
     #print(accelerometer_data_dic)
 
-
-if __name__ == "__main__":
-    accelerometer_main("C:/Users/orana/PycharmProjects/Project/data/1q9fj13m/accelerometer/accelerometer")

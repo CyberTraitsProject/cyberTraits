@@ -134,11 +134,7 @@ def power_state_main(power_state_dir):
         returned_value = last_on_power_state_date
     calc_avr_and_sd_on_dic()
     print(power_states_data_dic)
-
-
-if __name__ == "__main__":
-    power_state_main("C:/Users/orana/PycharmProjects/project/data/1q9fj13m/power_state")
-
+	return avr_and_sd_dic
 
 
 

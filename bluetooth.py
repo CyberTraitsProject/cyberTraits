@@ -25,9 +25,6 @@ def bluetooth_main(bluetooth_dir):
         exit(1)
     for curr_bluetooth_file in os.listdir(bluetooth_dir):
         organize_data(bluetooth_dir, curr_bluetooth_file, bluetooth_data_dic)
-    calc_avr_and_sd_on_dic(bluetooth_data_dic)
+    avr_and_sd_dic = calc_avr_and_sd_on_dic(bluetooth_data_dic)
     #print(wifi_data_dic)
-
-
-if __name__ == "__main__":
-    bluetooth_main("C:/Users/yafitsn/PycharmProjects/Project/data/1q9fj13m/bluetooth")
+	return avr_and_sd_dic
