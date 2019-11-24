@@ -7,25 +7,24 @@ import numpy as np
 
 
 
-def calc_avr_and_sd_on_dic(data_dic):
+def calc_avr_and_sd_on_dic(data_dic, data_type):
     array_list = [[], [], []]  # [[night_num_times], [day_num_times], [evening_num_times]]
-    avr_and_sd_dic = {'night':      {'average': 0, 'sd': 0},
-						'day':        {'average': 0, 'sd': 0},
-						'evening':    {'average': 0, 'sd': 0}}
-	for date in data_dic:
-        array_list[0].append(len(data_dic[date]['night']))
-        array_list[1].append(len(data_dic[date]['day']))
-        array_list[2].append(len(data_dic[date]['evening']))
-    avr_and_sd_dic['night']['average']     = np.array(array_list[0]).mean()
-    avr_and_sd_dic['night']['sd']          = np.array(array_list[0]).std()
-    avr_and_sd_dic['day']['average']       = np.array(array_list[1]).mean()
-    avr_and_sd_dic['day']['sd']            = np.array(array_list[1]).std()
-    avr_and_sd_dic['evening']['average']   = np.array(array_list[2]).mean()
-    avr_and_sd_dic['evening']['sd']        = np.array(array_list[2]).std()
+    avr_and_sd_list = []
+    titles_list = []
+    for date in data_dic:
+        for i, day_time in enumerate(day_times):
+            array_list[i].append(len(data_dic[date][day_time]))
 
-    print(array_list)
-    print(avr_and_sd_dic)
-	return avr_and_sd_dic
+    for i, day_time in enumerate(day_times):
+        avr_and_sd_list.append(np.array(array_list[i]).mean())
+        titles_list.append(data_type + '_' + day_time + '_avg')
+
+        avr_and_sd_list.append(np.array(array_list[i]).std())
+        titles_list.append(data_type + '_' + day_time + '_std')
+
+    #print(array_list)
+    #print(avr_and_sd_dic)
+    return titles_list, avr_and_sd_list
 
 
 def organize_data(path_dir, wifi_file, data_dic):
@@ -34,8 +33,8 @@ def organize_data(path_dir, wifi_file, data_dic):
     hashed_MAC_list_unique = wifi_df['hashed MAC'].unique()
     part_of_day = get_part_of_day(get_date_time_from_file_name(wifi_file.replace(".csv", "")))
     if file_date not in data_dic:
-        data_dic[file_date] = {    'night':    np.array([]),
-                                        'day':      np.array([]),
-                                        'evening':  np.array([])}
+        data_dic[file_date] = {'night':    np.array([]),
+                               'day':      np.array([]),
+                               'evening':  np.array([])}
     all_hashed_MAC = np.append(data_dic[file_date][part_of_day], hashed_MAC_list_unique)
     data_dic[file_date][part_of_day] = np.unique(all_hashed_MAC)

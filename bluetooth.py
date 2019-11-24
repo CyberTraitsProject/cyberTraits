@@ -25,6 +25,5 @@ def bluetooth_main(bluetooth_dir):
         exit(1)
     for curr_bluetooth_file in os.listdir(bluetooth_dir):
         organize_data(bluetooth_dir, curr_bluetooth_file, bluetooth_data_dic)
-    avr_and_sd_dic = calc_avr_and_sd_on_dic(bluetooth_data_dic)
+    return calc_avr_and_sd_on_dic(bluetooth_data_dic, 'bluetooth')
     #print(wifi_data_dic)
-	return avr_and_sd_dic

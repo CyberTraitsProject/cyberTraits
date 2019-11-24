@@ -1,27 +1,27 @@
 """
 define 4 macro- 1. Screen turned on
-                2. Screen turned off
-                3. Device Idle (Doze) state change signal received; device not in idle state
-                4. Device Idle (Doze) state change signal received; device in idle state
+				2. Screen turned off
+				3. Device Idle (Doze) state change signal received; device not in idle state
+				4. Device Idle (Doze) state change signal received; device in idle state
 
 1. pass on the power_state files and take the data for every day from the hours 9:00-18:00.
 2. takes two things:    2.1. count how much times the phone was on "Screen turned on" state.
-                        2.2. summarize how much time the phone was in "Screen turned on" state.
+						2.2. summarize how much time the phone was in "Screen turned on" state.
 
 1. pass on the power_state files and take the data for every day from the hours 18:00-00:00.
 2. takes two things:    2.1. count how much times the phone was on "Screen turned on" state.
-                        2.2. summarize how much time the phone was in "Screen turned on" state.
+						2.2. summarize how much time the phone was in "Screen turned on" state.
 
 1. pass on the power_state files and take the data for every day from the hours 00:00-9:00.
 2. takes two things:    2.1. count how much times the phone was on "Screen turned on" state.
-                        2.2. summarize how much time the phone was in "Screen turned on" state.
+						2.2. summarize how much time the phone was in "Screen turned on" state.
 
 -----------------------------------------------------------------------------------------
 
 to calculate    1. the average of the number of times the phone wan on "Screen turned on" state, for day, evening and night - 3 values.
-                2. the SD of the number of times the phone wan on "Screen turned on" state, for day, evening and night - 3 values.
-                3. the average of the time the phone wan on "Screen turned on" state, for day, evening and night - 3 values.
-                4. the SD of the time the phone wan on "Screen turned on" state, for day, evening and night - 3 values.
+				2. the SD of the number of times the phone wan on "Screen turned on" state, for day, evening and night - 3 values.
+				3. the average of the time the phone wan on "Screen turned on" state, for day, evening and night - 3 values.
+				4. the SD of the time the phone wan on "Screen turned on" state, for day, evening and night - 3 values.
 """
 
 import pandas as pd
@@ -29,11 +29,10 @@ import os
 from date_time import *
 import numpy as np
 
-power_states_data_dic = {}
 
-avr_and_sd_dic = {'night':      {'num_times': {'average': 0, 'sd': 0}, 'sum_time': {'average': 0, 'sd': 0}},
-                  'day':        {'num_times': {'average': 0, 'sd': 0}, 'sum_time': {'average': 0, 'sd': 0}},
-                  'evening':    {'num_times': {'average': 0, 'sd': 0}, 'sum_time': {'average': 0, 'sd': 0}}}
+check_variables = ['num_times', 'sum_time']
+
+power_states_data_dic = {}
 
 
 def get_list_of_power_on_durations(on_time, off_time):
@@ -56,7 +55,7 @@ def update_durations_in_power_states_data_dic(start_date_time, durations_list):
     while i < len(durations_list):
         power_states_data_dic[cur_date][part_of_day]['num_times'] += 1
         power_states_data_dic[cur_date][part_of_day]['sum_time'] += durations_list[i]
-        print(durations_list[i])
+        #print(durations_list[i])
         part_of_day = get_next_day_time(start_date_time)
         if part_of_day == 'night':
             start_date_time += datetime.timedelta(days=1)
@@ -65,29 +64,26 @@ def update_durations_in_power_states_data_dic(start_date_time, durations_list):
 
 
 def calc_avr_and_sd_on_dic():
-    array_list = [[[],[]], [[],[]], [[],[]]]  # [[[night_num_times],[night_sum_times]], [[day_num_times],[day_sum_times]], [[[evening_num_times],[evening_sum_times]]]]
-    for date in power_states_data_dic:
-        array_list[0][0].append(power_states_data_dic[date]['night']['num_times'])
-        array_list[0][1].append(power_states_data_dic[date]['night']['sum_time'])
-        array_list[1][0].append(power_states_data_dic[date]['day']['num_times'])
-        array_list[1][1].append(power_states_data_dic[date]['day']['sum_time'])
-        array_list[2][0].append(power_states_data_dic[date]['evening']['num_times'])
-        array_list[2][1].append(power_states_data_dic[date]['evening']['sum_time'])
-    avr_and_sd_dic['night']['num_times']['average']     = np.array(array_list[0][0]).mean()
-    avr_and_sd_dic['night']['sum_time']['average']      = np.array(array_list[0][1]).mean()
-    avr_and_sd_dic['night']['num_times']['sd']          = np.array(array_list[0][0]).std()
-    avr_and_sd_dic['night']['sum_time']['sd']           = np.array(array_list[0][1]).std()
-    avr_and_sd_dic['day']['num_times']['average']       = np.array(array_list[1][0]).mean()
-    avr_and_sd_dic['day']['sum_time']['average']        = np.array(array_list[1][1]).mean()
-    avr_and_sd_dic['day']['num_times']['sd']            = np.array(array_list[1][0]).std()
-    avr_and_sd_dic['day']['sum_time']['sd']             = np.array(array_list[1][1]).std()
-    avr_and_sd_dic['evening']['num_times']['average']   = np.array(array_list[2][0]).mean()
-    avr_and_sd_dic['evening']['sum_time']['average']    = np.array(array_list[2][1]).mean()
-    avr_and_sd_dic['evening']['num_times']['sd']        = np.array(array_list[2][0]).std()
-    avr_and_sd_dic['evening']['sum_time']['sd']         = np.array(array_list[2][1]).std()
 
-    print(array_list)
-    print(avr_and_sd_dic)
+    array_list = [[[],[]], [[],[]], [[],[]]]  # [[[night_num_times],[night_sum_times]], [[day_num_times],[day_sum_times]], [[[evening_num_times],[evening_sum_times]]]]
+    avr_and_sd_list = []
+    power_state_titles_list = []
+
+    for date in power_states_data_dic:
+        for i, day_time in enumerate(day_times):	# pass on night, day & evening
+            for j, check_variable in enumerate(check_variables):	# pass on num_times & sum_times
+                array_list[i][j].append(power_states_data_dic[date][day_time][check_variable])
+
+    for i, day_time in enumerate(day_times):
+        for j, check_variable in enumerate(check_variables):	# pass on num_times & sum_times
+            avr_and_sd_list.append(np.array(array_list[i][j]).mean())
+            power_state_titles_list.append('power_state_' + day_time + '_' + check_variable + '_avg')
+
+            avr_and_sd_list.append(np.array(array_list[i][j]).std())
+            power_state_titles_list.append('power_state_' + day_time + '_' + check_variable + '_std')
+
+    #print(array_list)
+    return power_state_titles_list, avr_and_sd_list
 
 
 def organize_data(path_dir, power_state_file, last_on_power_state_date):
@@ -95,7 +91,7 @@ def organize_data(path_dir, power_state_file, last_on_power_state_date):
     if file_date not in power_states_data_dic:
         power_states_data_dic[file_date] = {'night':    {'num_times': 0, 'sum_time': 0},
                                             'day':      {'num_times': 0, 'sum_time': 0},
-                                            'evening':  {'num_times': 0, 'sum_time': 0}}
+                                        'evening':  {'num_times': 0, 'sum_time': 0}}
 
     power_states_df = pd.read_csv(os.path.join(path_dir, power_state_file), usecols=['UTC time', 'event'])
 
@@ -132,21 +128,19 @@ def power_state_main(power_state_dir):
     for curr_power_state_file in os.listdir(power_state_dir):
         last_on_power_state_date = organize_data(power_state_dir, curr_power_state_file, returned_value)
         returned_value = last_on_power_state_date
-    calc_avr_and_sd_on_dic()
-    print(power_states_data_dic)
-	return avr_and_sd_dic
+    return calc_avr_and_sd_on_dic()
 
 
 
 
-    """lines = open("C:/Users/yafitsn/Downloads/data/1q9fj13m/power_state/1/sum.csv", "r").readlines()
-    sum = 0
-    for i,line in enumerate(lines):
-        if i == 22:
-            break
-        if i%2 == 0:
-            on_time = datetime.datetime.strptime(line.split("S")[0], '%Y-%m-%dT%H:%M:%S.%f')
-        else:
-            off_time = datetime.datetime.strptime(line.split("S")[0], '%Y-%m-%dT%H:%M:%S.%f')
-            sum += (off_time - on_time).total_seconds() / 60
-    print(sum)"""
+"""lines = open("C:/Users/yafitsn/Downloads/data/1q9fj13m/power_state/1/sum.csv", "r").readlines()
+sum = 0
+for i,line in enumerate(lines):
+    if i == 22:
+        break
+    if i%2 == 0:
+        on_time = datetime.datetime.strptime(line.split("S")[0], '%Y-%m-%dT%H:%M:%S.%f')
+    else:
+        off_time = datetime.datetime.strptime(line.split("S")[0], '%Y-%m-%dT%H:%M:%S.%f')
+        sum += (off_time - on_time).total_seconds() / 60
+print(sum)"""

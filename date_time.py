@@ -5,6 +5,7 @@ START_DAY = datetime.datetime(1, 1, 1, 9, 0, 0, 0)          # calculate by UTC. 
 START_EVENING = datetime.datetime(1, 1, 1, 18, 0, 0, 0)     # calculate by UTC. TODO - to match it to the real time in Israel - 16:00
 START_NIGHT = datetime.datetime(1, 1, 1, 0, 0, 0, 0)        # calculate by UTC. TODO - to match it to the real time in Israel - 22:00
 
+day_times = ['night', 'day', 'evening']
 
 ON = "Screen turned on"
 OFF = "Screen turned off"

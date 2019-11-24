@@ -20,7 +20,7 @@ def questionnaires_main(questionnaires_dir):
         if candidate_id not in questionnaires_info:
             questionnaires_info[candidate_id] = {}
         questionnaires_info[candidate_id][traits_names_list[i]] = scores_list[i]
-    print(questionnaires_info)
+    #print(questionnaires_info)
     return questionnaires_info
 
 
