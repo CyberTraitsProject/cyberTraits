@@ -37,7 +37,7 @@ def get_next_day_time(date_time):
     elif get_part_of_day(date_time) == 'evening':   # day time
         return 'night'
     else:                                           # evening time
-        return 'morning'
+        return 'day'
 
 
 def get_next_part_of_day_start_time(date_time):
