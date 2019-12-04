@@ -3,6 +3,7 @@ from accelerometer import accelerometer_main
 from power_state import power_state_main
 from bluetooth import bluetooth_main
 from wifi import wifi_main
+from GPS import gps_main
 from questionnaires import questionnaires_main
 import numpy as np
 
@@ -42,6 +43,10 @@ def create_csv_for_machine_learning(data_path, trait_name):
 		wifi_titles_list, wifi_avr_and_sd_list = wifi_main(os.path.join(app_data_dir, candidate_dir, 'wifi'))
 		curr_data_list_for_machine_learning += wifi_avr_and_sd_list
 		data_fields_list_for_machine_learning += wifi_titles_list
+
+		gps_titles_list, gps_avr_and_sd_list = gps_main(os.path.join(app_data_dir, candidate_dir, 'gps'))
+		curr_data_list_for_machine_learning += gps_avr_and_sd_list
+		data_fields_list_for_machine_learning += gps_titles_list
 		
 		
 		# the data from the questionnaires
