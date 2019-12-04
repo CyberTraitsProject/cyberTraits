@@ -1,11 +1,14 @@
 import datetime
 
-
 START_DAY = datetime.datetime(1, 1, 1, 9, 0, 0, 0)          # calculate by UTC. TODO - to match it to the real time in Israel - 09:00
 START_EVENING = datetime.datetime(1, 1, 1, 18, 0, 0, 0)     # calculate by UTC. TODO - to match it to the real time in Israel - 16:00
 START_NIGHT = datetime.datetime(1, 1, 1, 0, 0, 0, 0)        # calculate by UTC. TODO - to match it to the real time in Israel - 22:00
 
 day_times = ['night', 'day', 'evening']
+
+NIGHT = 0
+DAY = 1
+EVENING = 2
 
 ON = "Screen turned on"
 OFF = "Screen turned off"
@@ -23,27 +26,27 @@ def get_date_time_from_file_name(str):
     return datetime.datetime.strptime(str, '%Y-%m-%d %H_%M_%S')
 
 def get_part_of_day(date_time):
-    if START_NIGHT.time() <= date_time.time() < START_DAY.time():      # night time
-        return 'night'
-    elif START_DAY.time() <= date_time.time() < START_EVENING.time():  # day time
-        return 'day'
-    else:                                                       # evening time
-        return 'evening'
+    if START_NIGHT.time() <= date_time.time() < START_DAY.time():       # night time
+        return day_times[NIGHT]
+    elif START_DAY.time() <= date_time.time() < START_EVENING.time():   # day time
+        return day_times[DAY]
+    else:                                                               # evening time
+        return day_times[EVENING]
 
 
 def get_next_day_time(date_time):
-    if get_part_of_day(date_time) == 'day':         # night time
-        return 'evening'
-    elif get_part_of_day(date_time) == 'evening':   # day time
-        return 'night'
+    if get_part_of_day(date_time) == day_times[DAY]:         # night time
+        return day_times[EVENING]
+    elif get_part_of_day(date_time) == day_times[EVENING]:   # day time
+        return day_times[NIGHT]
     else:                                           # evening time
-        return 'day'
+        return day_times[DAY]
 
 
 def get_next_part_of_day_start_time(date_time):
-    if get_next_day_time(date_time) == 'day':
+    if get_next_day_time(date_time) == day_times[DAY]:
         return START_DAY.time()
-    elif get_next_day_time(date_time) == 'evening':
+    elif get_next_day_time(date_time) == day_times[EVENING]:
         return START_EVENING.time()
     else:
         return START_NIGHT.time()

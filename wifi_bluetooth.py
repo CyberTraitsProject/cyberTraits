@@ -33,8 +33,8 @@ def organize_data(path_dir, wifi_file, data_dic):
     hashed_MAC_list_unique = wifi_df['hashed MAC'].unique()
     part_of_day = get_part_of_day(get_date_time_from_file_name(wifi_file.replace(".csv", "")))
     if file_date not in data_dic:
-        data_dic[file_date] = {'night':    np.array([]),
-                               'day':      np.array([]),
-                               'evening':  np.array([])}
+        data_dic[file_date] = {day_times[NIGHT]:    np.array([]),
+                               day_times[DAY]:      np.array([]),
+                               day_times[EVENING]:  np.array([])}
     all_hashed_MAC = np.append(data_dic[file_date][part_of_day], hashed_MAC_list_unique)
     data_dic[file_date][part_of_day] = np.unique(all_hashed_MAC)

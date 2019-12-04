@@ -57,7 +57,7 @@ def update_durations_in_power_states_data_dic(start_date_time, durations_list):
         power_states_data_dic[cur_date][part_of_day]['sum_time'] += durations_list[i]
         #print(durations_list[i])
         part_of_day = get_next_day_time(start_date_time)
-        if part_of_day == 'night':
+        if part_of_day == day_times[NIGHT]:
             start_date_time += datetime.timedelta(days=1)
             cur_date = str(start_date_time.date())
         i += 1
@@ -89,9 +89,9 @@ def calc_avr_and_sd_on_dic():
 def organize_data(path_dir, power_state_file, last_on_power_state_date):
     file_date = str(power_state_file).split(" ")[0]
     if file_date not in power_states_data_dic:
-        power_states_data_dic[file_date] = {'night':    {'num_times': 0, 'sum_time': 0},
-                                            'day':      {'num_times': 0, 'sum_time': 0},
-                                        'evening':  {'num_times': 0, 'sum_time': 0}}
+        power_states_data_dic[file_date] = {day_times[NIGHT]:    {'num_times': 0, 'sum_time': 0},
+                                            day_times[DAY]:      {'num_times': 0, 'sum_time': 0},
+                                            day_times[EVENING]:  {'num_times': 0, 'sum_time': 0}}
 
     power_states_df = pd.read_csv(os.path.join(path_dir, power_state_file), usecols=['UTC time', 'event'])
 
