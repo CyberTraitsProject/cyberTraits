@@ -90,7 +90,7 @@ def organize_data(path_dir, gps_file, prev_coord):
 def gps_main(gps_dir):
     if not os.path.isdir(gps_dir):
         print("Directory", gps_dir, "not exists")
-        exit(1)
+        return [], []
     returned_value = None
     for curr_gps_file in os.listdir(gps_dir):
         last_coord = organize_data(gps_dir, curr_gps_file, returned_value)

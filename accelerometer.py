@@ -95,7 +95,7 @@ def organize_data(path_dir, accelerometer_file):
 def accelerometer_main(accelerometer_dir):
     if not os.path.isdir(accelerometer_dir):
         print("Directory", accelerometer_dir, "not exists")
-        exit(1)
+        return [], []
     for curr_accelerometer_file in os.listdir(accelerometer_dir):
         organize_data(accelerometer_dir, curr_accelerometer_file)
     return calc_MAD_avg_for_hour()

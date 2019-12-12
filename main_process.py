@@ -3,9 +3,19 @@ from accelerometer import accelerometer_main
 from power_state import power_state_main
 from bluetooth import bluetooth_main
 from wifi import wifi_main
-from GPS import gps_main
+#from GPS import gps_main
 from questionnaires import questionnaires_main
 import numpy as np
+
+
+def global_main(app_data_dir, candidate_dir_name, sensor):
+	try:
+		func_name = sensor + "_main"
+		return globals()[func_name](os.path.join(app_data_dir, candidate_dir_name, sensor))
+	except KeyError:
+		print(f"no function name- {sensor}_main")
+		return [], []
+	#func_name(os.path.join(app_data_dir, candidate_dir_name, sensor))
 
 def create_csv_for_machine_learning(data_path, trait_name):
 
@@ -17,49 +27,41 @@ def create_csv_for_machine_learning(data_path, trait_name):
 		exit(1)
 		
 	data_fields_list_for_machine_learning = ['candidate_id']
-	
-	#print(data_fields_list_for_machine_learning)
+
+	sensors_names = ['accelerometer', 'power_state', 'bluetooth', 'wifi', 'gps']
+
+	# print(data_fields_list_for_machine_learning)
 	data_list_for_machine_learning = []
 	app_data_dir = os.path.join(data_path, "data")
 
-	for candidate_dir in os.listdir(app_data_dir):
+	first_candidate = True
 
+	for candidate_dir_name in os.listdir(app_data_dir):
+		print(candidate_dir_name)
 		curr_data_list_for_machine_learning = []
-		
-		curr_data_list_for_machine_learning.append(candidate_dir)
-	
-		accelerometer_titles_list, avr_MAD_list = accelerometer_main(os.path.join(app_data_dir, candidate_dir, 'accelerometer'))
-		curr_data_list_for_machine_learning += avr_MAD_list
-		data_fields_list_for_machine_learning += accelerometer_titles_list
-		
-		power_state_titles_list, power_state_avr_and_sd_list = power_state_main(os.path.join(app_data_dir, candidate_dir, 'power_state'))
-		curr_data_list_for_machine_learning += power_state_avr_and_sd_list
-		data_fields_list_for_machine_learning += power_state_titles_list
-		
-		"""bluetooth_titles_list, bluetooth_avr_and_sd_list = bluetooth_main(os.path.join(app_data_dir, candidate_dir, 'bluetooth'))
-		curr_data_list_for_machine_learning += bluetooth_avr_and_sd_list
-		data_fields_list_for_machine_learning += bluetooth_titles_list"""
-		
-		wifi_titles_list, wifi_avr_and_sd_list = wifi_main(os.path.join(app_data_dir, candidate_dir, 'wifi'))
-		curr_data_list_for_machine_learning += wifi_avr_and_sd_list
-		data_fields_list_for_machine_learning += wifi_titles_list
+		curr_data_list_for_machine_learning.append(candidate_dir_name)
 
-		gps_titles_list, gps_avr_and_sd_list = gps_main(os.path.join(app_data_dir, candidate_dir, 'gps'))
-		curr_data_list_for_machine_learning += gps_avr_and_sd_list
-		data_fields_list_for_machine_learning += gps_titles_list
-		
-		
-		# the data from the questionnaires
-		data_fields_list_for_machine_learning.append(trait_name)
-		curr_data_list_for_machine_learning += [questionnaires_info[candidate_dir][trait_name]]
+		for sensor in sensors_names:
+			sensor_titles_list, analayzed_data_list = global_main(app_data_dir, candidate_dir_name, sensor)
+			curr_data_list_for_machine_learning += analayzed_data_list
+			if first_candidate:
+				data_fields_list_for_machine_learning += sensor_titles_list
+		if first_candidate:
+			# the data from the questionnaires
+			data_fields_list_for_machine_learning.append(trait_name)
+		curr_data_list_for_machine_learning += [questionnaires_info[candidate_dir_name][trait_name]]
 		
 		data_list_for_machine_learning.append(curr_data_list_for_machine_learning)
 
-	print(len(data_fields_list_for_machine_learning), len(data_list_for_machine_learning[0]))
-	nparray1 = np.array([data_fields_list_for_machine_learning, data_list_for_machine_learning[0]])
-	print(nparray1)
-	np.savetxt(os.path.join(data_path, "machine_learning_data.csv"), nparray1, delimiter=',', fmt='%s')
+		first_candidate = False
+	print(data_list_for_machine_learning)
+	print(data_fields_list_for_machine_learning)
+	data_list_for_machine_learning.insert(0, data_fields_list_for_machine_learning)
+	#print(len(data_fields_list_for_machine_learning), len(data_list_for_machine_learning[0]))
+	np_data_for_csv_file = np.array(data_list_for_machine_learning)
+	print(np_data_for_csv_file)
+	np.savetxt(os.path.join(data_path, "machine_learning_data.csv"), np_data_for_csv_file, delimiter=',', fmt='%s')
 
 
 if __name__ == "__main__":
-	create_csv_for_machine_learning("C:/Users/yafitsn/PycharmProjects/project", "Secure")
+	create_csv_for_machine_learning("C:/Users/orana/PycharmProjects/ex2", "Secure")

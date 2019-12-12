@@ -123,7 +123,7 @@ def organize_data(path_dir, power_state_file, last_on_power_state_date):
 def power_state_main(power_state_dir):
     if not os.path.isdir(power_state_dir):
         print("Directory '", power_state_dir, "' not exists")
-        exit(1)
+        return [], []
     returned_value = None
     for curr_power_state_file in os.listdir(power_state_dir):
         last_on_power_state_date = organize_data(power_state_dir, curr_power_state_file, returned_value)
