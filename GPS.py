@@ -50,7 +50,7 @@ def calc_distance_between_2_gps_points(coord1, coord2):
 
 def organize_data(path_dir, gps_file, prev_coord):
 
-    gps_df = pd.read_csv(os.path.join(path_dir, gps_file), usecols=['UTC time', 'x', 'y', 'z'])
+    gps_df = pd.read_csv(os.path.join(path_dir, gps_file), usecols=['UTC time', 'latitude', 'longitude', 'UTC time'])
 
     latitude_list   = gps_df['latitude']
     longitude_list  = gps_df['longitude']
@@ -71,6 +71,9 @@ def organize_data(path_dir, gps_file, prev_coord):
             coord2 = (latitude_list[i], longitude_list[i])
             distance = calc_distance_between_2_gps_points(coord1, coord2)  # the distance in meters
             day_time = get_part_of_day(get_date_time_from_UTC_time(UTC_time))   # if the day time change, the distance will add to the next day time
+            print(distance, day_time)
+            prev_coord = None
+
             gps_data_dic[file_date][day_time] += distance
 
         if i == len(UTC_times_list) - 1:    # last row
@@ -80,6 +83,7 @@ def organize_data(path_dir, gps_file, prev_coord):
         coord2 = (latitude_list[i + 1], longitude_list[i + 1])
         distance = calc_distance_between_2_gps_points(coord1, coord2)   # the distance in meters
         day_time = get_part_of_day(get_date_time_from_UTC_time(UTC_time))
+        print(distance, day_time)
         gps_data_dic[file_date][day_time] += distance
 
 
@@ -91,8 +95,8 @@ def gps_main(gps_dir):
     for curr_gps_file in os.listdir(gps_dir):
         last_coord = organize_data(gps_dir, curr_gps_file, returned_value)
         returned_value = last_coord
+    print(gps_data_dic)
     return calc_avr_and_sd_on_dic()
-
 
 
 if __name__ == '__main__':
