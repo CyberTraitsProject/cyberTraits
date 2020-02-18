@@ -1,10 +1,7 @@
-
 import pandas as pd
 import os
 from date_time import *
 import numpy as np
-
-
 
 
 def calc_avr_and_sd_on_dic(data_dic, data_type):
@@ -22,8 +19,6 @@ def calc_avr_and_sd_on_dic(data_dic, data_type):
         avr_and_sd_list.append(np.array(array_list[i]).std())
         titles_list.append(data_type + '_' + day_time + '_std')
 
-    #print(array_list)
-    #print(avr_and_sd_dic)
     return titles_list, avr_and_sd_list
 
 

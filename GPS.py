@@ -71,7 +71,6 @@ def organize_data(path_dir, gps_file, prev_coord):
             coord2 = (latitude_list[i], longitude_list[i])
             distance = calc_distance_between_2_gps_points(coord1, coord2)  # the distance in meters
             day_time = get_part_of_day(get_date_time_from_UTC_time(UTC_time))   # if the day time change, the distance will add to the next day time
-            print(distance, day_time)
             prev_coord = None
 
             gps_data_dic[file_date][day_time] += distance
@@ -83,21 +82,21 @@ def organize_data(path_dir, gps_file, prev_coord):
         coord2 = (latitude_list[i + 1], longitude_list[i + 1])
         distance = calc_distance_between_2_gps_points(coord1, coord2)   # the distance in meters
         day_time = get_part_of_day(get_date_time_from_UTC_time(UTC_time))
-        print(distance, day_time)
         gps_data_dic[file_date][day_time] += distance
 
 
 def gps_main(gps_dir):
+
+    # for cleaning the previous data
+    global gps_data_dic
+    gps_data_dic = {}
+    print('----------gps dic-----------', gps_data_dic)
     if not os.path.isdir(gps_dir):
         print("Directory", gps_dir, "not exists")
-        return [], []
+        return calc_avr_and_sd_on_dic()
     returned_value = None
     for curr_gps_file in os.listdir(gps_dir):
         last_coord = organize_data(gps_dir, curr_gps_file, returned_value)
         returned_value = last_coord
-    print(gps_data_dic)
+    # print(gps_data_dic)
     return calc_avr_and_sd_on_dic()
-
-
-if __name__ == '__main__':
-    print(calc_distance_between_2_gps_points((31.71149, 35.0005983333333), (31.7114165, 35.0006818999999)))

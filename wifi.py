@@ -20,9 +20,13 @@ wifi_data_dic = {}
 
 
 def wifi_main(wifi_dir):
+
+    # for cleaning the previous data
+    global wifi_data_dic
+    wifi_data_dic = {}
     if not os.path.isdir(wifi_dir):
         print("Directory", wifi_dir, "not exists")
-        return [], []
+        return calc_avr_and_sd_on_dic({}, 'wifi')
     for curr_wifi_file in os.listdir(wifi_dir):
         organize_data(wifi_dir, curr_wifi_file, wifi_data_dic)
     return calc_avr_and_sd_on_dic(wifi_data_dic, 'wifi')

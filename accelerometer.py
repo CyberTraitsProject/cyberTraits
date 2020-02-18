@@ -93,9 +93,17 @@ def organize_data(path_dir, accelerometer_file):
 
 
 def accelerometer_main(accelerometer_dir):
+
+    # for cleaning the previous data
+    global accelerometer_data_dic
+    accelerometer_data_dic = {0: [], 1: [], 2: [], 3: [], 4: [], 5: [],
+                              6: [], 7: [], 8: [], 9: [], 10: [], 11: [],
+                              12: [], 13: [], 14: [], 15: [], 16: [], 17: [],
+                              18: [], 19: [], 20: [], 21: [], 22: [], 23: []}
+
     if not os.path.isdir(accelerometer_dir):
         print("Directory", accelerometer_dir, "not exists")
-        return [], []
+        return calc_MAD_avg_for_hour()
     for curr_accelerometer_file in os.listdir(accelerometer_dir):
         organize_data(accelerometer_dir, curr_accelerometer_file)
     return calc_MAD_avg_for_hour()

@@ -20,9 +20,14 @@ from wifi_bluetooth import *
 bluetooth_data_dic = {}
 
 def bluetooth_main(bluetooth_dir):
+
+    # for cleaning the previous data
+    global bluetooth_data_dic
+    bluetooth_data_dic = {}
+
     if not os.path.isdir(bluetooth_dir):
         print("Directory", bluetooth_dir, "not exists")
-        return [], []
+        return calc_avr_and_sd_on_dic({}, 'bluetooth')
     for curr_bluetooth_file in os.listdir(bluetooth_dir):
         organize_data(bluetooth_dir, curr_bluetooth_file, bluetooth_data_dic)
     return calc_avr_and_sd_on_dic(bluetooth_data_dic, 'bluetooth')
