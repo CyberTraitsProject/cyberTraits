@@ -22,14 +22,17 @@ def calc_avr_and_sd_on_dic(data_dic, data_type):
     return titles_list, avr_and_sd_list
 
 
-def organize_data(path_dir, wifi_file, data_dic):
-    file_date = str(wifi_file).split(" ")[0]
-    wifi_df = pd.read_csv(os.path.join(path_dir, wifi_file), usecols=['hashed MAC'])
-    hashed_MAC_list_unique = wifi_df['hashed MAC'].unique()
-    part_of_day = get_part_of_day(get_date_time_from_file_name(wifi_file.replace(".csv", "")))
-    if file_date not in data_dic:
-        data_dic[file_date] = {day_times[NIGHT]:    np.array([]),
+def organize_data(path_dir, sensor_file, sensor_data):
+    file_date = str(sensor_file).split(" ")[0]
+    sensor_df = pd.read_csv(os.path.join(path_dir, sensor_file), usecols=['hashed MAC'])
+    hashed_MAC_list_unique = sensor_df['hashed MAC'].unique()
+    # part_of_day = get_part_of_day(get_date_time_from_file_name(sensor_file.replace(".csv", "")))
+    '''if file_date not in sensor_data.data_dic:
+        sensor_data.data_dic[file_date] = {day_times[NIGHT]:    np.array([]),
                                day_times[DAY]:      np.array([]),
-                               day_times[EVENING]:  np.array([])}
-    all_hashed_MAC = np.append(data_dic[file_date][part_of_day], hashed_MAC_list_unique)
-    data_dic[file_date][part_of_day] = np.unique(all_hashed_MAC)
+                               day_times[EVENING]:  np.array([])}'''
+    hour = get_date_time_from_file_name(sensor_file).hour
+    sensor_data.data_dic[hour].append(hashed_MAC_list_unique)
+    '''all_hashed_MAC = np.append(sensor_data.data_dic[file_date][hour], hashed_MAC_list_unique)
+    sensor_data.data_dic[hour] = np.unique(all_hashed_MAC)'''
+

@@ -6,6 +6,12 @@ START_NIGHT = datetime.datetime(1, 1, 1, 0, 0, 0, 0)        # calculate by UTC. 
 
 day_times = ['night', 'day', 'evening']
 
+day_times_new = {
+    'night':    [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    'day':      [9, 10, 11, 12, 13, 14, 15, 16, 17],
+    'evening':  [18, 19, 20, 21, 22, 23]
+}
+
 NIGHT = 0
 DAY = 1
 EVENING = 2
@@ -23,7 +29,7 @@ def get_date_time_from_UTC_time(str):
     return datetime.datetime.strptime(str, '%Y-%m-%dT%H:%M:%S.%f')
 
 def get_date_time_from_file_name(str):
-    return datetime.datetime.strptime(str, '%Y-%m-%d %H_%M_%S')
+    return datetime.datetime.strptime(str, '%Y-%m-%d %H_%M_%S.csv')
 
 def get_part_of_day(date_time):
     if START_NIGHT.time() <= date_time.time() < START_DAY.time():       # night time

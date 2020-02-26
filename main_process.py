@@ -78,4 +78,4 @@ def create_csv_for_machine_learning(data_path, trait_name):
 	#machine_learning_model_main(machine_learning_data_path, trait_name)
 
 if __name__ == "__main__":
-	create_csv_for_machine_learning("C:/Users/onaki/PycharmProjects/Cyber", "Secure")
+	create_csv_for_machine_learning(r"C:\Users\Yafit Shneor\GitHub\cyberTraits", "Secure")
