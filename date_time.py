@@ -63,3 +63,6 @@ def get_next_date_for_next_time(date_time, next_time):
         date_time += datetime.timedelta(days=1)
     new_date_time = datetime.datetime(date_time.year, date_time.month, date_time.day, next_time.hour, next_time.minute, next_time.second, next_time.microsecond)
     return new_date_time
+
+def get_date_from_file_name(file_name):
+    return file_name.split(' ')[0]

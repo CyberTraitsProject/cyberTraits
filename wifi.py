@@ -29,9 +29,10 @@ def wifi_main(wifi_dir):
     wifi_data = Sensor_Data('wifi')
     if not os.path.isdir(wifi_dir):
         print("Directory", wifi_dir, "not exists")
-        return calc_avr_and_sd_on_dic({}, 'wifi')
+        return wifi_data.calc_avr_and_sd_on_dic(day_times_new)
     for curr_wifi_file in os.listdir(wifi_dir):
         organize_data(wifi_dir, curr_wifi_file, wifi_data)
+    print(wifi_data)
     return wifi_data.calc_avr_and_sd_on_dic(day_times_new)
     #print(wifi_data_dic)
 

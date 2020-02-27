@@ -4,7 +4,7 @@ from date_time import *
 import numpy as np
 
 
-def calc_avr_and_sd_on_dic(data_dic, data_type):
+'''def calc_avr_and_sd_on_dic(data_dic, data_type):
     array_list = [[], [], []]  # [[night_num_times], [day_num_times], [evening_num_times]]
     avr_and_sd_list = []
     titles_list = []
@@ -19,7 +19,7 @@ def calc_avr_and_sd_on_dic(data_dic, data_type):
         avr_and_sd_list.append(np.array(array_list[i]).std())
         titles_list.append(data_type + '_' + day_time + '_std')
 
-    return titles_list, avr_and_sd_list
+    return titles_list, avr_and_sd_list'''
 
 
 def organize_data(path_dir, sensor_file, sensor_data):
@@ -31,8 +31,10 @@ def organize_data(path_dir, sensor_file, sensor_data):
         sensor_data.data_dic[file_date] = {day_times[NIGHT]:    np.array([]),
                                day_times[DAY]:      np.array([]),
                                day_times[EVENING]:  np.array([])}'''
+    date = get_date_from_file_name(sensor_file)
     hour = get_date_time_from_file_name(sensor_file).hour
-    sensor_data.data_dic[hour].append(hashed_MAC_list_unique)
+    # sensor_data.data_dic[hour].append(hashed_MAC_list_unique)
+    sensor_data.data_dic[date][hour] = hashed_MAC_list_unique
     '''all_hashed_MAC = np.append(sensor_data.data_dic[file_date][hour], hashed_MAC_list_unique)
     sensor_data.data_dic[hour] = np.unique(all_hashed_MAC)'''
 
