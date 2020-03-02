@@ -16,7 +16,7 @@ to take the SD's of the counts of days, nights and evenings - 3 values.
 """
 
 from wifi_bluetooth import *
-from sensor_data import *
+from sensor_data import Sensor_Data
 
 bluetooth_data_dic = {}
 
@@ -30,8 +30,8 @@ def bluetooth_main(bluetooth_dir):
 
     if not os.path.isdir(bluetooth_dir):
         print("Directory", bluetooth_dir, "not exists")
-        return bluetooth_data.calc_avr_and_sd_on_dic(day_times_new)
+        return bluetooth_data.calc_avr_and_sd_on_dic(day_times_3)
     for curr_bluetooth_file in os.listdir(bluetooth_dir):
         organize_data(bluetooth_dir, curr_bluetooth_file, bluetooth_data)
-    return bluetooth_data.calc_avr_and_sd_on_dic(day_times_new)
+    return bluetooth_data.calc_avr_and_sd_on_dic(day_times_3)
     #print(wifi_data_dic)

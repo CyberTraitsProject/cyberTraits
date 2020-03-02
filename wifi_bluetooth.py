@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from date_time import *
-import numpy as np
+# import numpy as np
 
 
 '''def calc_avr_and_sd_on_dic(data_dic, data_type):
@@ -23,7 +23,6 @@ import numpy as np
 
 
 def organize_data(path_dir, sensor_file, sensor_data):
-    file_date = str(sensor_file).split(" ")[0]
     sensor_df = pd.read_csv(os.path.join(path_dir, sensor_file), usecols=['hashed MAC'])
     hashed_MAC_list_unique = sensor_df['hashed MAC'].unique()
     # part_of_day = get_part_of_day(get_date_time_from_file_name(sensor_file.replace(".csv", "")))
@@ -34,6 +33,8 @@ def organize_data(path_dir, sensor_file, sensor_data):
     date = get_date_from_file_name(sensor_file)
     hour = get_date_time_from_file_name(sensor_file).hour
     # sensor_data.data_dic[hour].append(hashed_MAC_list_unique)
+    if date not in sensor_data.data_dic:
+        sensor_data.data_dic[date] = {}
     sensor_data.data_dic[date][hour] = hashed_MAC_list_unique
     '''all_hashed_MAC = np.append(sensor_data.data_dic[file_date][hour], hashed_MAC_list_unique)
     sensor_data.data_dic[hour] = np.unique(all_hashed_MAC)'''

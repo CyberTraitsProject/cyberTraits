@@ -15,7 +15,7 @@ def global_main(app_data_dir, candidate_dir_name, sensor):
 		func_name = sensor + "_main"
 		return globals()[func_name](os.path.join(app_data_dir, candidate_dir_name, sensor))
 	except KeyError:
-		print(f"no function name- {sensor}_main")
+		print(f"No function name- {sensor}_main")
 		return [], []
 	#func_name(os.path.join(app_data_dir, candidate_dir_name, sensor))
 
@@ -78,4 +78,5 @@ def create_csv_for_machine_learning(data_path, trait_name):
 	#machine_learning_model_main(machine_learning_data_path, trait_name)
 
 if __name__ == "__main__":
-	create_csv_for_machine_learning(r"C:\Users\Yafit Shneor\GitHub\cyberTraits", "Secure")
+	create_csv_for_machine_learning(r"C:\Users\onaki\CyberTraits\cyberTraits", "Secure")
+	#print(global_main(r"C:\Users\onaki\CyberTraits\cyberTraits", "123", 'wifi'))

@@ -1,14 +1,12 @@
 """
 1. pass on the accelerometer files and take the data for every hour.
 2. take the data of every 1 second. if we dont have information on specific time, we need to take the values 0, 0, 0.
-3. calculate the MAD. n=60*60=3600
+3. calculate the MAD. the mad will calculate on every day time, of all the hours in it. every hour is - n=60*60=3600
 
 ----------------------------------------------------
 
 what we get:
-MAD of every hour.
-
-to do an average of every hour in the tested days - 24 values.
+average and sd of every day time.
 
 """
 
@@ -17,28 +15,22 @@ import pandas as pd
 import os
 from date_time import *
 import numpy as np
+from sensor_data import *
 
-N = 60 * 60 # 60 minutes * 60 seconds
-
-
-accelerometer_data_dic = {0: [],   1: [],     2: [],     3: [],     4: [],     5: [],
-                          6: [],   7: [],     8: [],     9: [],     10: [],    11: [],
-                          12: [],  13: [],    14: [],    15: [],    16: [],    17: [],
-                          18: [],  19: [],    20: [],    21: [],    22: [],    23: []}
+N = 60 * 60     # 60 minutes * 60 seconds
 
 
+def calc_MAD_avg_for_hour(accelerometer_data):
 
-def calc_MAD_avg_for_hour():
-
-    avr_MAD_list = []   # list of MAD averages for every hour in the day, ascending
+    avr_MAD_list = []   # list of MAD averages for every hour in the day, in ascending order
     accelerometer_titles_list = []
 
-    sorted_hours_keys = sorted(accelerometer_data_dic)
+    sorted_hours_keys = sorted(accelerometer_data.data_dic)
     for hour in sorted_hours_keys:
-        if len(accelerometer_data_dic[hour]) == 0:  # for not sending empty array to average function
+        if len(accelerometer_data.data_dic[hour]) == 0:  # for not sending empty array to average function
             avr_MAD_list.append(0)
         else:
-            avr_MAD_list.append(np.average(accelerometer_data_dic[hour]))
+            avr_MAD_list.append(np.average(accelerometer_data.data_dic[hour]))
 
         accelerometer_titles_list.append('avg_MAD_of_' + str(hour) + "_o'clock")
 
@@ -63,7 +55,7 @@ def calculate_MAD(x_y_z_list_for_hour):
     return MAD
 
 
-def organize_data(path_dir, accelerometer_file):
+def organize_data(path_dir, accelerometer_file, accelerometer_data):
     """file_date = str(accelerometer_file).split(" ")[0]
     if file_date not in accelerometer_data_dic:
         accelerometer_data_dic[file_date] = []"""
@@ -88,22 +80,20 @@ def organize_data(path_dir, accelerometer_file):
                 while curr_date_time.minute == i and curr_date_time.second <= j and curr_line_index + 1 != len(UTC_times_list):
                     curr_line_index += 1
                     curr_date_time = get_date_time_from_UTC_time(UTC_times_list[curr_line_index])
-    MAD = calculate_MAD(x_y_z_list_for_hour)
-    accelerometer_data_dic[curr_date_time.hour].append(MAD)
+    date = get_date_from_file_name(accelerometer_file)
+    hour = curr_date_time.hour
+    if date not in accelerometer_data.data_dic:
+        accelerometer_data.data_dic[date] = {}
+    accelerometer_data.data_dic[date][hour] = x_y_z_list_for_hour
 
 
 def accelerometer_main(accelerometer_dir):
 
-    # for cleaning the previous data
-    global accelerometer_data_dic
-    accelerometer_data_dic = {0: [], 1: [], 2: [], 3: [], 4: [], 5: [],
-                              6: [], 7: [], 8: [], 9: [], 10: [], 11: [],
-                              12: [], 13: [], 14: [], 15: [], 16: [], 17: [],
-                              18: [], 19: [], 20: [], 21: [], 22: [], 23: []}
+    accelerometer_data = Sensor_Data('accelerometer')
 
     if not os.path.isdir(accelerometer_dir):
         print("Directory", accelerometer_dir, "not exists")
-        return calc_MAD_avg_for_hour()
+        return calc_MAD_avg_for_hour(accelerometer_data)
     for curr_accelerometer_file in os.listdir(accelerometer_dir):
-        organize_data(accelerometer_dir, curr_accelerometer_file)
-    return calc_MAD_avg_for_hour()
+        organize_data(accelerometer_dir, curr_accelerometer_file, accelerometer_data)
+    return accelerometer_data.calc_avr_and_sd_on_dic(day_times_24)  # calc_MAD_avg_for_hour(accelerometer_data)
