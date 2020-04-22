@@ -8,6 +8,8 @@ from GPS import gps_main
 from questionnaires import questionnaires_main
 import numpy as np
 from machine_learning_model import machine_learning_model_main
+from texts import texts_main
+from calls import calls_main
 
 
 def global_main(app_data_dir, candidate_dir_name, sensor):
@@ -30,7 +32,7 @@ def create_csv_for_machine_learning(data_path, trait_name):
 		
 	data_fields_list_for_machine_learning = ['candidate_id']
 
-	sensors_names = ['accelerometer', 'power_state', 'bluetooth', 'wifi', 'gps']
+	sensors_names = ['accelerometer', 'power_state', 'bluetooth', 'wifi', 'gps', 'texts', 'calls']
 
 	# print(data_fields_list_for_machine_learning)
 	data_list_for_machine_learning = []

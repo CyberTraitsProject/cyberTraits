@@ -6,6 +6,10 @@ START_NIGHT = datetime.datetime(1, 1, 1, 0, 0, 0, 0)        # calculate by UTC. 
 
 day_times = ['night', 'day', 'evening']
 
+day_times_1 = {
+    'all_day': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+}
+
 day_times_3 = {
     'night':    [0, 1, 2, 3, 4, 5, 6, 7, 8],
     'day':      [9, 10, 11, 12, 13, 14, 15, 16, 17],
