@@ -1,5 +1,7 @@
 import numpy as np
 import date_time
+import collections
+import math
 
 # num seconds in a hour
 N = 60 * 60
@@ -9,6 +11,10 @@ OUT = 1
 MISSED = 2
 OUT_0 = 3
 DURATION_MEDIAN = 4
+PHONE_NUMBERS_DURATIONS = 5
+
+NUM_MIN_IN_HOUR = 60
+NUM_SEC_IN_MIN = 60
 
 def get_ri(x_y_z_arr):     # the accelerometer result in time i
     return pow((pow(x_y_z_arr[0], 2) + pow(x_y_z_arr[1], 2) + pow(x_y_z_arr[2], 2)), -2)   # (x^2 + y^2 + z^2)^-2
@@ -87,7 +93,6 @@ class Sensor_Data():
                             MACs_list = np.append(MACs_list, hours_data_dic[hour])
                     num_unique_MACs = len(np.unique(MACs_list))
                     day_times_data[day_time_index].append(num_unique_MACs)
-                # for accelerometer:
                 if self.name == 'accelerometer':
                     X_Y_Zs_list = []
                     for hour in hours_in_day_time:
@@ -108,7 +113,7 @@ class Sensor_Data():
                         day_times_data[day_time_index].insert(IN, [out_in[IN]])
                         day_times_data[day_time_index].insert(OUT, [out_in[OUT]])
                 if self.name == 'calls':
-                    calls_types = np.array([0, 0, 0, 0, []])
+                    calls_types = np.array([0, 0, 0, 0, [], collections.Counter()])
                     for hour in hours_in_day_time:
                         if hour in hours_data_dic:
                             calls_types += np.array(hours_data_dic[hour])
@@ -119,13 +124,16 @@ class Sensor_Data():
                         day_times_data[day_time_index][MISSED].append(calls_types[MISSED])
                         day_times_data[day_time_index][OUT_0].append(calls_types[OUT_0])
                         day_times_data[day_time_index][DURATION_MEDIAN].append(self.calc_median(calls_types[DURATION_MEDIAN], 0)[1])
+                        day_times_data[day_time_index][PHONE_NUMBERS_DURATIONS].append(self.calc_S_for_calls(calls_types[PHONE_NUMBERS_DURATIONS], len(hours_in_day_time)))
+                        print('+=============+', calls_types[PHONE_NUMBERS_DURATIONS], len(hours_in_day_time))
                     except IndexError:
                         day_times_data[day_time_index].insert(IN, [calls_types[IN]])
                         day_times_data[day_time_index].insert(OUT, [calls_types[OUT]])
                         day_times_data[day_time_index].insert(MISSED, [calls_types[MISSED]])
                         day_times_data[day_time_index].insert(OUT_0, [calls_types[OUT_0]])
                         day_times_data[day_time_index].insert(DURATION_MEDIAN, [self.calc_median(calls_types[DURATION_MEDIAN], 0)[1]])
-
+                        day_times_data[day_time_index].insert(PHONE_NUMBERS_DURATIONS, [self.calc_S_for_calls(calls_types[PHONE_NUMBERS_DURATIONS], len(hours_in_day_time))])
+                        print('+=============+', calls_types[PHONE_NUMBERS_DURATIONS], len(hours_in_day_time))
         print(day_times_data)
         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
         print(self.data_dic)
@@ -159,6 +167,11 @@ class Sensor_Data():
                 percent_outgoing_calls_arr = (np.array(day_times_data[day_time_index][OUT]) / all_calls)
                 title, avg = self.calc_avg(percent_outgoing_calls_arr, day_time, additional_name='percent_outgoing_')
                 titles_list.append(title), avr_and_sd_list.append(avg)
+                # calculate the avg of S (S = Different hardening of the user with the different contacts)
+                print('-------------++++++--------------', day_times_data[day_time_index][PHONE_NUMBERS_DURATIONS])
+                title, avg = self.calc_avg(day_times_data[day_time_index][PHONE_NUMBERS_DURATIONS], day_time, additional_name='S')
+                titles_list.append(title), avr_and_sd_list.append(avg)
+
         print(titles_list)
         print(avr_and_sd_list)
         return titles_list, avr_and_sd_list
@@ -219,3 +232,11 @@ class Sensor_Data():
         title = self.name + '_' + additional_name + str(day_time) + '_median'
         return title, std
 
+    def calc_F_list_for_calls(self, phone_numbers_durations_ctr, day_time_duration_in_hour):
+        duration_time_in_sec = day_time_duration_in_hour * NUM_MIN_IN_HOUR * NUM_SEC_IN_MIN
+        Fi_list = [duration / duration_time_in_sec for phone_number, duration in phone_numbers_durations_ctr.items()]
+        return Fi_list
+
+    def calc_S_for_calls(self, phone_numbers_durations_ctr, day_time_duration_in_hour):
+        Fi_list = self.calc_F_list_for_calls(phone_numbers_durations_ctr, day_time_duration_in_hour)
+        return -1 * sum([Fi * math.log10(Fi) for Fi in Fi_list])

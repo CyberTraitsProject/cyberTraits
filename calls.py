@@ -11,17 +11,17 @@ do median of number of the outgoing calls and incoming calls - 2 values.
 TODO - if the calls file does not exists - there is a problem with the number of the columns (it returns 2 columns and not 4)
 """
 
-from sensor_data import Sensor_Data
+from sensor_data import *
 from date_time import *
 import os
 import pandas as pd
-
 
 def organize_data(path_dir, sensor_file, sensor_data):
     sensor_df = pd.read_csv(os.path.join(path_dir, sensor_file), usecols=['hashed phone number',
                                                                           'call type', 'duration in seconds'])
     # first step:
     # to calc the avg, std, median, common on the number of outgoing and incoming calls
+    hashed_phone_number_list = sensor_df['hashed phone number']
     sent_vs_received_list = sensor_df['call type']
     durations_list = sensor_df['duration in seconds']
     print(type(list(durations_list)))
@@ -35,18 +35,25 @@ def organize_data(path_dir, sensor_file, sensor_data):
     num_missed_calls = len([1 for text_type in sent_vs_received_list if text_type == 'Missed Call'])
     num_outgoing_0_calls = len([1 for i, text_type in enumerate(sent_vs_received_list) if text_type == 'Outgoing Call' and durations_list[i] == 0])
 
-    sensor_data.data_dic[date][hour] = [num_incoming_calls, num_outgoing_calls, num_missed_calls, num_outgoing_0_calls, list(durations_list)]
+    # will contain for every phone number, how much time he talked to.
+    # hashed_phone_number : calls_duration
+    phones_numbers_dic = collections.Counter()
+    for i, phone_number in enumerate(hashed_phone_number_list):
+            phones_numbers_dic[phone_number] += durations_list[i]
+
+    sensor_data.data_dic[date][hour] = [num_incoming_calls, num_outgoing_calls, num_missed_calls, num_outgoing_0_calls, list(durations_list), collections.Counter(phones_numbers_dic)]
+    print(sensor_data.data_dic[date][hour])
     print(num_outgoing_0_calls)
 
-def calls_main(texts_dir):
-    texts_data = Sensor_Data('calls')
-    if not os.path.isdir(texts_dir):
-        print("Directory", texts_dir, "not exists")
-        return texts_data.calc_avr_and_sd_on_dic(day_times_1)
-    for curr_texts_file in os.listdir(texts_dir):
-        organize_data(texts_dir, curr_texts_file, texts_data)
-    print(texts_data)
-    return texts_data.calc_avr_and_sd_on_dic(day_times_1, num_times=2, calc_median=True, calc_common=True)
+def calls_main(calls_dir):
+    calls_data = Sensor_Data('calls')
+    if not os.path.isdir(calls_dir):
+        print("Directory", calls_dir, "not exists")
+        return calls_data.calc_avr_and_sd_on_dic(day_times_1)
+    for curr_texts_file in os.listdir(calls_dir):
+        organize_data(calls_dir, curr_texts_file, calls_data)
+    print(calls_data)
+    return calls_data.calc_avr_and_sd_on_dic(day_times_1, num_times=2, calc_median=True, calc_common=True)
 
 
-calls_main(r'C:\Users\onaki\Downloads\data\2yct4nu4\calls')
+#calls_main(r'C:\Users\onaki\CyberTraits\cyberTraits\data\1q9fj13m\calls')
