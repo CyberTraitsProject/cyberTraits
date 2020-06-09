@@ -1,101 +1,88 @@
-"""
-1. pass on the accelerometer files and take the data for every hour.
-2. take the data of every 1 second. if we dont have information on specific time, we need to take the values 0, 0, 0.
-3. calculate the MAD. the mad will calculate on every day time, of all the hours in it. every hour is - n=60*60=3600
-
-----------------------------------------------------
-
-what we get:
-average and sd of every day time.
-
-"""
-
-
 import pandas as pd
-import os
 from date_time import *
-import numpy as np
 from sensor_data import *
-
-N = 60 * 60     # 60 minutes * 60 seconds
-
-
-def calc_MAD_avg_for_hour(accelerometer_data):
-
-    avr_MAD_list = []   # list of MAD averages for every hour in the day, in ascending order
-    accelerometer_titles_list = []
-
-    sorted_hours_keys = sorted(accelerometer_data.data_dic)
-    for hour in sorted_hours_keys:
-        if len(accelerometer_data.data_dic[hour]) == 0:  # for not sending empty array to average function
-            avr_MAD_list.append(0)
-        else:
-            avr_MAD_list.append(np.average(accelerometer_data.data_dic[hour]))
-
-        accelerometer_titles_list.append('avg_MAD_of_' + str(hour) + "_o'clock")
-
-    #print(avr_MAD_list)
-    return accelerometer_titles_list, avr_MAD_list
-
-
-def get_ri(x_y_z_arr):     # the accelerometer result in time i
-    return pow((pow(x_y_z_arr[0], 2) + pow(x_y_z_arr[1], 2) + pow(x_y_z_arr[2], 2)), -2)   # (x^2 + y^2 + z^2)^-2
-
-
-def calculate_average(x_y_z_list_for_hour):
-    ri_arr = [get_ri(x_y_z) for x_y_z in x_y_z_list_for_hour]
-    r_avg = 1/N * sum(ri_arr)
-    return ri_arr, r_avg
-
-
-def calculate_MAD(x_y_z_list_for_hour):
-    ri_arr, r_avg = calculate_average(x_y_z_list_for_hour)
-    dis_arr = [np.abs(ri - r_avg) for ri in ri_arr]
-    MAD = 1/N * sum(dis_arr)
-    return MAD
 
 
 def organize_data(path_dir, accelerometer_file, accelerometer_data):
-    """file_date = str(accelerometer_file).split(" ")[0]
-    if file_date not in accelerometer_data_dic:
-        accelerometer_data_dic[file_date] = []"""
+    """
+    pass on the accelerometer_file - this file contains accelerometer data on specific date on specific hour.
+    the name of the file is the date and the hour.
+    the file contains data in this shape: [timestamp, UTC time, accuracy, x, y, z]
+    the function add its data to the sensor dictionary-
+    collect the x, y, z data of every second, and put this list in the dictionary, in this date and hour.
+    :param path_dir: the path to the directory the sensor data found there
+    :param accelerometer_file: the name of the file to organize
+    :param accelerometer_data: the global sensor data dictionary
+    """
 
-    accelerometer_df = pd.read_csv(os.path.join(path_dir, accelerometer_file), usecols=['UTC time', 'x', 'y', 'z'])
+    full_path_accelerometer_file = os.path.join(path_dir, accelerometer_file)
+    check_if_file_exists(full_path_accelerometer_file)
 
+    accelerometer_df = pd.read_csv(full_path_accelerometer_file, usecols=['UTC time', 'x', 'y', 'z'])
     x_list = accelerometer_df['x']
     y_list = accelerometer_df['y']
     z_list = accelerometer_df['z']
     UTC_times_list = accelerometer_df['UTC time']
 
-    x_y_z_list_for_hour = []    # will contain 60*60 values, that every value is [x,y,z]
+    # will contain 60*60 values (for every second), that every value is [x,y,z]
+    x_y_z_list_for_hour = []
 
+    # the index of the line we need to take the data from
     curr_line_index = 0
     curr_date_time = get_date_time_from_UTC_time(UTC_times_list[curr_line_index])
+
+    # pass on 60 minutes
     for i in range(60):
+
+        # pass on 60 seconds in a minute
         for j in range(60):
-            if (curr_date_time.minute != i or curr_date_time.second != j) or curr_line_index + 1 == len(UTC_times_list):    # the curr time is more or little then the wanted time, or we finished all the lines in the file --> there is a need to fulfill the values with 0,0,0
+
+            # the curr time is more or little than the wanted time, or we finished all the lines in the file -->
+            # there is a need to fulfill the values with 0,0,0 (it will calculate in the functions - MAD function &
+            # calculate_average - we divide there by 60*60)
+            if (curr_date_time.minute != i or curr_date_time.second != j) or curr_line_index + 1 == len(UTC_times_list):
                 continue
             else:
+                # add the x, y, z values to the x_y_z_list
                 x_y_z_list_for_hour.append([x_list[curr_line_index], y_list[curr_line_index], z_list[curr_line_index]])
+
+                # while the next line is on the same minute and second, and we don't reach EOF,
+                # we continue to the next line
                 while curr_date_time.minute == i and curr_date_time.second <= j and curr_line_index + 1 != len(UTC_times_list):
                     curr_line_index += 1
                     curr_date_time = get_date_time_from_UTC_time(UTC_times_list[curr_line_index])
+
+    # get the date and the hour
     date = get_date_from_file_name(accelerometer_file)
     hour = curr_date_time.hour
+
+    # if it is a new date -> add it to the dictionary
     if date not in accelerometer_data.data_dic:
         accelerometer_data.data_dic[date] = {}
+
+    # add the x_y_z_list to the dictionary in the specific date and hour
     accelerometer_data.data_dic[date][hour] = x_y_z_list_for_hour
 
 
 def accelerometer_main(accelerometer_dir):
+    """
+    create an instance of Sensor_Data, pass on all of the accelerometer data file,
+    organize them and do the calculations of this data.
+    :param accelerometer_dir: the directory that the accelerometer data files found there
+    :return: the calculated data in 2 lists - the calculated data and its titles
+    """
+
+    check_if_dir_exists(accelerometer_dir)
 
     accelerometer_data = Sensor_Data('accelerometer')
 
-    if not os.path.isdir(accelerometer_dir):
-        print("Directory", accelerometer_dir, "not exists")
-        return accelerometer_data.calc_avr_and_sd_on_dic(day_times_3)   # calc_MAD_avg_for_hour(accelerometer_data)
+    # pass on every file and send it to the organize_data function
     for curr_accelerometer_file in os.listdir(accelerometer_dir):
         organize_data(accelerometer_dir, curr_accelerometer_file, accelerometer_data)
-    return accelerometer_data.calc_avr_and_sd_on_dic(day_times_3)  # calc_MAD_avg_for_hour(accelerometer_data)
 
-#accelerometer_main(r'C:\Users\onaki\CyberTraits\cyberTraits\data\1q9fj13m\accelerometer')
+    # send the data to the calculation function, and return the calculated data + its titles
+    return accelerometer_data.calc_calculations_on_dic(day_times_3)
+
+
+if __name__ == '__main__':
+    accelerometer_main(r'C:\Users\onaki\CyberTraits\cyberTraits\data\1q9fj13m\accelerometer')
