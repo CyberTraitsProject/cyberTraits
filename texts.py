@@ -46,10 +46,9 @@ def texts_main(texts_dir):
     :return: the calculated data in 2 lists - the calculated data and its titles
     """
 
+    #texts_data = organize_all_sensor_data(texts_dir, 'texts')
+
     check_if_dir_exists(texts_dir)
-    '''if not os.path.isdir(texts_dir):
-        print("Directory", texts_dir, "not exists")
-        return texts_data.calc_calculations_on_dic(day_times_1)'''
 
     texts_data = Sensor_Data('texts')
 

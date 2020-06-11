@@ -145,16 +145,19 @@ def organize_data(path_dir, power_state_file, power_state_data, last_on_power_st
         # the current power state is on
         elif power_state == ON:
             on_time = get_date_time_from_UTC_time(UTC_times_list[i])
-            # we not didnt reach EOF
-            if i + 1 < len(power_states_list):
+            # we didnt reach EOF and the next event is off
+            if i + 1 < len(power_states_list) and power_states_list[i + 1] == OFF:
                 off_time = get_date_time_from_UTC_time(UTC_times_list[i + 1])
             # we reached to EOF
-            else:
+            elif i + 1 == len(power_states_list):
                 last_on_power_state_date = UTC_times_list[i]
                 # return the last on event
                 # i.e. - the file finished with on event, so we need to check the next file,
                 # when the off event happened.
                 return last_on_power_state_date
+            # we didnt reach EOF and the next event is not off - calculate it as duration 0
+            else:
+                off_time = on_time
 
         # another power states never mind
         else:

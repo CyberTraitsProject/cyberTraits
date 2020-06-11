@@ -27,10 +27,26 @@ def organize_data(path_dir, accelerometer_file, accelerometer_data):
     # will contain 60*60 values (for every second), that every value is [x,y,z]
     x_y_z_list_for_hour = []
 
-    # the index of the line we need to take the data from
-    curr_line_index = 0
-    curr_date_time = get_date_time_from_UTC_time(UTC_times_list[curr_line_index])
+    # the previous line data
+    p_min = p_sec = curr_date_time = ""
 
+    # pass on every x,y,z data, and if we still not added this time (minute + second) to the x,y,z lists,
+    # we will add it
+    for i in range(len(UTC_times_list)):
+        curr_date_time = get_date_time_from_UTC_time(UTC_times_list[i])
+        c_min = curr_date_time.minute
+        c_sec = curr_date_time.second
+
+        # this minute and second weren't found before --> add the x,y,z values to the list
+        if c_min != p_min or c_sec != p_sec:
+            x_y_z_list_for_hour.append([x_list[i], y_list[i], z_list[i]])
+            # update the last minute and second that we added its x,y,z values
+            p_min = c_min
+            p_sec = c_sec
+    '''
+    # the index of the line we need to take the data from
+    #curr_line_index = 0
+    
     # pass on 60 minutes
     for i in range(60):
 
@@ -40,7 +56,11 @@ def organize_data(path_dir, accelerometer_file, accelerometer_data):
             # the curr time is more or little than the wanted time, or we finished all the lines in the file -->
             # there is a need to fulfill the values with 0,0,0 (it will calculate in the functions - MAD function &
             # calculate_average - we divide there by 60*60)
-            if (curr_date_time.minute != i or curr_date_time.second != j) or curr_line_index + 1 == len(UTC_times_list):
+            #if (curr_date_time.minute != i or curr_date_time.second != j) or curr_line_index + 1 == len(UTC_times_list):
+                #continue
+            if curr_line_index == len(UTC_times_list):
+                break
+            if curr_date_time.minute != i or curr_date_time.second != j:
                 continue
             else:
                 # add the x, y, z values to the x_y_z_list
@@ -51,7 +71,7 @@ def organize_data(path_dir, accelerometer_file, accelerometer_data):
                 while curr_date_time.minute == i and curr_date_time.second <= j and curr_line_index + 1 != len(UTC_times_list):
                     curr_line_index += 1
                     curr_date_time = get_date_time_from_UTC_time(UTC_times_list[curr_line_index])
-
+    '''
     # get the date and the hour
     date = get_date_from_file_name(accelerometer_file)
     hour = curr_date_time.hour
@@ -85,4 +105,4 @@ def accelerometer_main(accelerometer_dir):
 
 
 if __name__ == '__main__':
-    accelerometer_main(r'C:\Users\onaki\CyberTraits\cyberTraits\data\1q9fj13m\accelerometer')
+    accelerometer_main(r'C:\Users\onaki\CyberTraits\cyberTraits\acc_dt')
