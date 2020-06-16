@@ -53,6 +53,54 @@ def collect_xyz_from_file():
     return xyz_list
 
 
+def calc_avg_and_std_on_file(day_times):
+    accelerometer_df = pd.read_csv(combined_file, usecols=['UTC time', 'x', 'y', 'z'])
+    UTC_time_list = accelerometer_df['UTC time']
+    x_list = accelerometer_df['x']
+    y_list = accelerometer_df['y']
+    z_list = accelerometer_df['z']
+
+    # list of lists that will contain the data of every day time, data on every date
+    data_list_for_all_day_times = [[] for c_day_time in day_times]
+
+    counter_data_for_cur_date = [[] for c_day_time in day_times]
+    p_date = ''
+    p_hour = ''
+    p_min = ''
+    p_sec = ''
+    for i, UTC_time in enumerate(UTC_time_list):
+        cur_date = UTC_time.split('T')[0]
+        cur_hour = (UTC_time.split('T')[1]).split(':')[0]
+        cur_min = (UTC_time.split('T')[1]).split(':')[1]
+        cur_sec = ((UTC_time.split('T')[1]).split(':')[2]).split('.')[0]
+
+        if cur_date != p_date and p_date:
+            # update the sum times the kind of the data appeared in this date
+            for j, c_day_time in enumerate(day_times):
+                data_list_for_all_day_times[j].append(
+                    do_MAD_on_xyz_lists(counter_data_for_cur_date[j], len(day_times[c_day_time])))
+            counter_data_for_cur_date = [[] for c_day_time in day_times]
+
+        if p_date != cur_date or p_hour != cur_hour or p_min != cur_min or p_sec != cur_sec:
+            counter_data_for_cur_date[get_day_time_index(cur_hour, day_times)].append([x_list[i], y_list[i], z_list[i]])
+        p_date = cur_date
+        p_hour = cur_hour
+        p_min = cur_min
+        p_sec = cur_sec
+
+    # update the last date data
+    for j, c_day_time in enumerate(day_times):
+        data_list_for_all_day_times[j].append(
+            do_MAD_on_xyz_lists(counter_data_for_cur_date[j], len(day_times[c_day_time])))
+
+    avg_and_std_list = []
+    for i, c_day_time in enumerate(day_times):
+        avg_and_std_list.append(do_avg_on_list(data_list_for_all_day_times[i]))
+        avg_and_std_list.append(do_std_on_list(data_list_for_all_day_times[i]))
+
+    return avg_and_std_list
+
+
 def accelerometer_organize_all_data():
     """
     :return: the sensor data, just like the code do it
@@ -93,6 +141,21 @@ class AccelerometerTests(unittest.TestCase):
 
         self.assertEqual(len(accelerometer_x_y_z_list), len(test_x_y_z_list))
         self.assertEqual(round_list(accelerometer_x_y_z_list), round_list(test_x_y_z_list))
+
+    def test_data_calculated_well(self):
+        """Checks if the avg and std of the MADs lists_in_texts calculated well for every day time"""
+        # avr_and_sd_list order is: [avg_MAD_dt1, std_MAD_dt1, ..., avg_MAD_dtN, std_MAD_dtN]
+        titles_list, avr_and_sd_list = accelerometer_data.calc_calculations_on_dic(day_times_1)
+
+        accelerometer_avg_and_std_MAD = avr_and_sd_list
+        test_avg_and_std_MAD = calc_avg_and_std_on_file(day_times_1)
+
+        print('accelerometer_avg_and_std_MAD:', accelerometer_avg_and_std_MAD)
+        print('test_avg_and_std_MAD:', test_avg_and_std_MAD)
+
+        #self.assertEqual(len(accelerometer_avg_and_std_MAD), len(test_avg_and_std_MAD))
+        self.assertEqual(list(np.round(np.array(accelerometer_avg_and_std_MAD), 10)),
+                         list(np.round(np.array(test_avg_and_std_MAD), 10)))
 
 
 if __name__ == '__main__':

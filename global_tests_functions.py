@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import numpy as np
 from collections import Counter
+import math
+from math import pow
 
 
 def count_num_dates(sensor_dir):
@@ -99,7 +101,34 @@ def do_common_on_list(sensor_data_list):
     return np.bincount(np.array(sensor_data_list)).argmax()#Counter(sensor_data_list).most_common(1)[0][0]
 
 
-def get_day_time_index(cur_hour, day_time):
-    for i, c_day_time in enumerate(day_time):
-        if int(cur_hour) in day_time[c_day_time]:
+def get_day_time_index(cur_hour, day_times):
+    for i, c_day_time in enumerate(day_times):
+        if int(cur_hour) in day_times[c_day_time]:
             return i
+
+def get_key_from_hour(hour, day_times):
+    for key, hours_list in day_times.items():
+        if hour in hours_list:
+            return key
+
+def do_S_on_dic(phones_durations_dic, num_hours_in_dt):
+    sum_time_in_sec = num_hours_in_dt * 60 * 60 # =T
+    # calculate the Fi list
+    Fi_list = []
+    for phone_number, duration_time in phones_durations_dic.items():
+        Fi_list.append(duration_time / sum_time_in_sec)
+    S = 0
+    for Fi in Fi_list:
+        S += Fi * math.log10(Fi)
+    return -1 * S
+
+def do_MAD_on_xyz_lists(xyz_lists, num_hours_in_dt):
+    ri_list = []
+    for xyz in xyz_lists:
+        ri_list.append(pow(pow(xyz[0], 2) + pow(xyz[1], 2) + pow(xyz[2], 2), -2))
+    avg_r = sum(ri_list) / (num_hours_in_dt * 60 * 60)
+    abs_list = []
+    for ri in ri_list:
+        abs_list.append(abs(ri - avg_r))
+    MAD = sum(abs_list) / (num_hours_in_dt * 60 * 60)
+    return MAD

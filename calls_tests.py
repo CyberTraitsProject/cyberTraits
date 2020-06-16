@@ -3,7 +3,7 @@ from global_tests_functions import *
 from calls import *
 
 # the path to the accelerometer data directory
-calls_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\6ilaolvn\calls'
+calls_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\2ppn81sa\calls'
 
 
 def count_num_outgoing_0_calls(string):
@@ -65,14 +65,14 @@ def sum_durations_for_contacts():
 
 
 def do_calculations_on_file(day_times):
-    texts_df = pd.read_csv(combined_file, usecols=['UTC time', 'hashed phone number', 'call type', 'duration in seconds'])
-    UTC_time_list = texts_df['UTC time']
-    phones_list = texts_df['hashed phone number']
-    calls_types_list = texts_df['call type']
-    durations_list = texts_df['duration in seconds']
+    calls_df = pd.read_csv(combined_file, usecols=['UTC time', 'hashed phone number', 'call type', 'duration in seconds'])
+    UTC_time_list = calls_df['UTC time']
+    phones_list = calls_df['hashed phone number']
+    calls_types_list = calls_df['call type']
+    durations_list = calls_df['duration in seconds']
 
     # list of lists that will contain the data of every day time, data on every date
-    data_list_for_all_day_times = [[[], [], [], [], [], collections.Counter()] for c_day_time in day_times]
+    data_list_for_all_day_times = [[[], [], [], [], [], [], []] for c_day_time in day_times]
 
     counter_data_for_cur_date = [[0, 0, 0, 0, [], collections.Counter()] for c_day_time in day_times]
 
@@ -84,33 +84,58 @@ def do_calculations_on_file(day_times):
         if cur_date != p_date and p_date:
             # update the previous date data in the all data list
             for j, c_day_time in enumerate(day_times):
-                data_list_for_all_day_times[j][0].append(counter_data_for_cur_date[j][0])   # num_in_calls
-                data_list_for_all_day_times[j][1].append(counter_data_for_cur_date[j][1])   # num_out_calls
-                data_list_for_all_day_times[j][2].append(counter_data_for_cur_date[j][2])   # num_missed_calls
-                data_list_for_all_day_times[j][3].append(counter_data_for_cur_date[j][3])   # num_out0_calls
-                # data_list_for_all_day_times[j][4].append(counter_data_for_cur_date[j][4])  # durations list
-                # data_list_for_all_day_times[j][5] += counter_data_for_cur_date[j][5]  # phones calls durations
+                num_in_calls_in_dt = counter_data_for_cur_date[j][0]
+                data_list_for_all_day_times[j][0].append(num_in_calls_in_dt)  # num_in_calls
+                num_out_calls_in_dt = counter_data_for_cur_date[j][1]
+                data_list_for_all_day_times[j][1].append(num_out_calls_in_dt)  # num_out_calls
+                num_missed_calls_in_dt = counter_data_for_cur_date[j][2]
+                data_list_for_all_day_times[j][2].append(num_missed_calls_in_dt)  # num_missed_calls
+                data_list_for_all_day_times[j][3].append(counter_data_for_cur_date[j][3])  # num_out0_calls
+                data_list_for_all_day_times[j][4].append(
+                    do_median_on_list(counter_data_for_cur_date[j][4]))  # median of the durations list
+                all_calls_in_dt = num_out_calls_in_dt + num_in_calls_in_dt + num_missed_calls_in_dt
+                data_list_for_all_day_times[j][5].append(
+                    num_out_calls_in_dt / all_calls_in_dt)  # percent outgoing calls
+                data_list_for_all_day_times[j][6].append(
+                    do_S_on_dic(counter_data_for_cur_date[j][5] + collections.Counter(),
+                                len(day_times[c_day_time])))  # S of phones calls durations
 
             counter_data_for_cur_date = [[0, 0, 0, 0, [], collections.Counter()] for c_day_time in day_times]
         p_date = cur_date
 
+        # update the num_in_calls
         if calls_types_list[i] == 'Incoming Call':
             counter_data_for_cur_date[get_day_time_index(cur_hour, day_times)][0] += 1
+        # update the num_out_calls
         if calls_types_list[i] == 'Outgoing Call':
             counter_data_for_cur_date[get_day_time_index(cur_hour, day_times)][1] += 1
+        # update the num_missed_calls
         if calls_types_list[i] == 'Missed Call':
             counter_data_for_cur_date[get_day_time_index(cur_hour, day_times)][2] += 1
+        # update the num_out_0_calls
         if calls_types_list[i] == 'Outgoing Call' and durations_list[i] == 0:
             counter_data_for_cur_date[get_day_time_index(cur_hour, day_times)][3] += 1
+        # add the duration to the durations list
+        counter_data_for_cur_date[get_day_time_index(cur_hour, day_times)][4].append(durations_list[i])
+        # update the dictionary of the durations calls with every contact
+        counter_data_for_cur_date[get_day_time_index(cur_hour, day_times)][5][phones_list[i]] += durations_list[i]
 
     # update the last date data
     for j, c_day_time in enumerate(day_times):
-        data_list_for_all_day_times[j][0].append(counter_data_for_cur_date[j][0])  # num_in_calls
-        data_list_for_all_day_times[j][1].append(counter_data_for_cur_date[j][1])  # num_out_calls
-        data_list_for_all_day_times[j][2].append(counter_data_for_cur_date[j][2])  # num_missed_calls
+        num_in_calls_in_dt = counter_data_for_cur_date[j][0]
+        data_list_for_all_day_times[j][0].append(num_in_calls_in_dt)  # num_in_calls
+        num_out_calls_in_dt = counter_data_for_cur_date[j][1]
+        data_list_for_all_day_times[j][1].append(num_out_calls_in_dt)  # num_out_calls
+        num_missed_calls_in_dt = counter_data_for_cur_date[j][2]
+        data_list_for_all_day_times[j][2].append(num_missed_calls_in_dt)  # num_missed_calls
         data_list_for_all_day_times[j][3].append(counter_data_for_cur_date[j][3])  # num_out0_calls
-        # data_list_for_all_day_times[j][4].append(counter_data_for_cur_date[j][4])  # durations list
-        # data_list_for_all_day_times[j][5] += counter_data_for_cur_date[j][5]  # phones calls durations
+        data_list_for_all_day_times[j][4].append(
+            do_median_on_list(counter_data_for_cur_date[j][4]))  # median of the durations list
+        all_calls_in_dt = num_out_calls_in_dt + num_in_calls_in_dt + num_missed_calls_in_dt
+        data_list_for_all_day_times[j][5].append(num_out_calls_in_dt / all_calls_in_dt)  # percent outgoing calls
+        data_list_for_all_day_times[j][6].append(
+            do_S_on_dic(counter_data_for_cur_date[j][5] + collections.Counter(),
+                        len(day_times[c_day_time])))  # S of phones calls durations
 
     avg_and_std_list = []
     # calculate the calculations on num_in_calls
@@ -125,13 +150,13 @@ def do_calculations_on_file(day_times):
         avg_and_std_list.append(do_std_on_list(data_list_for_all_day_times[i][1]))
         avg_and_std_list.append(do_median_on_list(data_list_for_all_day_times[i][1]))
         avg_and_std_list.append(do_common_on_list(data_list_for_all_day_times[i][1]))
-    # calculate the calculations on num_missed_calls, num_out_0_calls, durations_list, per
+    # calculate the avg on num_missed_calls, num_out_0_calls, durations_median_list, percent outgoing calls, S
     for i, c_day_time in enumerate(day_times):
         avg_and_std_list.append(do_avg_on_list(data_list_for_all_day_times[i][2]))
-        avg_and_std_list.append(do_std_on_list(data_list_for_all_day_times[i][3]))
-        avg_and_std_list.append(do_median_on_list(data_list_for_all_day_times[i][1]))
-        avg_and_std_list.append(do_common_on_list(data_list_for_all_day_times[i][1]))
-        avg_and_std_list.append(do_common_on_list(data_list_for_all_day_times[i][1]))
+        avg_and_std_list.append(do_avg_on_list(data_list_for_all_day_times[i][3]))
+        avg_and_std_list.append(do_avg_on_list(data_list_for_all_day_times[i][4]))
+        avg_and_std_list.append(do_avg_on_list(data_list_for_all_day_times[i][5]))
+        avg_and_std_list.append(do_avg_on_list(data_list_for_all_day_times[i][6]))
 
     return avg_and_std_list
 
@@ -237,14 +262,14 @@ class CallsTests(unittest.TestCase):
 
         self.assertEqual(len(calls_avg_and_std_num_in_calls), len(test_avg_and_std_num_in_calls))
         self.assertEqual(len(calls_avg_and_std_num_out_calls), len(test_avg_and_std_num_out_calls))
-        #self.assertEqual(len(calls_avg_num_missed_num_out0_median_duratin_S_calls),
-                         #len(test_avg_num_missed_num_out0_median_duratin_S_calls))
+        self.assertEqual(len(calls_avg_num_missed_num_out0_median_duratin_S_calls),
+                         len(test_avg_num_missed_num_out0_median_duratin_S_calls))
         self.assertEqual(list(np.round(np.array(calls_avg_and_std_num_in_calls), 4)),
                          list(np.round(np.array(test_avg_and_std_num_in_calls), 4)))
         self.assertEqual(list(np.round(np.array(calls_avg_and_std_num_out_calls), 4)),
                          list(np.round(np.array(test_avg_and_std_num_out_calls), 4)))
-        #self.assertEqual(list(np.round(np.array(calls_avg_num_missed_num_out0_median_duratin_S_calls), 4)),
-                         #list(np.round(np.array(test_avg_num_missed_num_out0_median_duratin_S_calls), 4)))
+        self.assertEqual(list(np.round(np.array(calls_avg_num_missed_num_out0_median_duratin_S_calls), 4)),
+                         list(np.round(np.array(test_avg_num_missed_num_out0_median_duratin_S_calls), 4)))
 
 
 if __name__ == '__main__':
