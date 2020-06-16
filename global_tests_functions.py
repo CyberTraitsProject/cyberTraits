@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
+from collections import Counter
 
 
 def count_num_dates(sensor_dir):
@@ -66,8 +67,8 @@ def count_num_strings_in_file(file, string, col_name):
     :param col_name:the name of the column
     :return: the num times the string found in the col in this file
     """
-    texts_df = pd.read_csv(file, usecols=[col_name])
-    return (texts_df[col_name] == string).sum()
+    sensor_df = pd.read_csv(file, usecols=[col_name])
+    return (sensor_df[col_name] == string).sum()
 
 
 def round_list(list_of_lists):
@@ -80,3 +81,25 @@ def round_list(list_of_lists):
     for c_list in list_of_lists:
         n_list_of_lists.append(list(np.around(np.array(c_list), 4)))
     return n_list_of_lists
+
+
+def do_avg_on_list(sensor_data_list):
+    return np.average(np.array(sensor_data_list))
+
+
+def do_std_on_list(sensor_data_list):
+    return np.std(np.array(sensor_data_list))
+
+
+def do_median_on_list(sensor_data_list):
+    return np.median(np.array(sensor_data_list))
+
+
+def do_common_on_list(sensor_data_list):
+    return np.bincount(np.array(sensor_data_list)).argmax()#Counter(sensor_data_list).most_common(1)[0][0]
+
+
+def get_day_time_index(cur_hour, day_time):
+    for i, c_day_time in enumerate(day_time):
+        if int(cur_hour) in day_time[c_day_time]:
+            return i
