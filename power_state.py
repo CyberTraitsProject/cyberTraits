@@ -10,6 +10,8 @@ SHORT_ON_TIME = 2
 # the common time the phone is on
 COMMON_ON_TIME = 5
 
+# the max time it makes sense the phone is on
+MAX_ON_TIME = 3
 
 def get_list_of_power_on_durations(on_time, off_time):
     """
@@ -27,7 +29,7 @@ def get_list_of_power_on_durations(on_time, off_time):
     # that says there is a bug in the data -->
     # we will send an array with single value 0
     # this time will add to the num_times, but will not add to the sum_times(it will be 0).
-    if (off_time - on_time) >= datetime.timedelta(hours=3):
+    if (off_time - on_time) >= datetime.timedelta(hours=MAX_ON_TIME):
         return [0]
 
     # the list of the durations
@@ -132,13 +134,27 @@ def organize_data(path_dir, power_state_file, power_state_data, last_on_power_st
 
         # on after on - error date from the app
         if power_state == ON and last_on_power_state_date:
+            # calculate the last_on_power_state_date as on time with duration 0
+            on_time = get_date_time_from_UTC_time(last_on_power_state_date)
+            off_time = on_time
+            durations_list = get_list_of_power_on_durations(on_time, off_time)
+            # update the hour's durations in the data dic
+            update_durations_in_power_states_data_dic(on_time, durations_list, power_state_data.data_dic)
+            # update the number of the short duration times
+            update_short_duration(on_time, off_time, power_state_data.data_dic)
             last_on_power_state_date = None
-            continue
 
         # the current event is off, and there was on event in the last time
-        elif power_state == OFF and last_on_power_state_date:
+        if power_state == OFF and last_on_power_state_date:
             on_time = get_date_time_from_UTC_time(last_on_power_state_date)
             off_time = get_date_time_from_UTC_time(UTC_times_list[i])
+            # we handle the last power state --> None
+            last_on_power_state_date = None
+
+        # the current event is not on or off, and there was on event in the last time, calculated as duration 0
+        elif last_on_power_state_date:
+            on_time = get_date_time_from_UTC_time(last_on_power_state_date)
+            off_time = on_time
             # we handle the last power state --> None
             last_on_power_state_date = None
 
@@ -216,7 +232,7 @@ def power_state_main(power_state_dir):
     # send the data to the calculation function, and return the calculated data + its titles
     # num_times=2, because the data contains two inputs that we need to calculate
     # avg, std on them - num on power state and sum on power state
-    return power_state_data.calc_calculations_on_dic(day_times_3, 2)
+    return power_state_data.calc_calculations_on_dic(day_times_3, num_times=2)
 
 
 if __name__ == '__main__':

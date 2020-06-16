@@ -195,6 +195,8 @@ class Sensor_Data():
                     calls_types = np.array([0, 0, 0, 0, [], collections.Counter()])
 
                     # pass on every hour in the date time, and collect the data in its cell in the calls_types array
+                    # NOTE that the addition between the counters cause to ignore from the keys that have value 0,
+                    # and this is good for us for calculating the S (log(0) is invalid)
                     for hour in hours_in_day_time:
                         if hour in hours_data_dic:
                             calls_types += np.array(hours_data_dic[hour])
