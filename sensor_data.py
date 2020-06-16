@@ -173,16 +173,19 @@ class Sensor_Data():
 
                 # for texts:
                 if self.name == 'texts':
-                    out_in = np.array([0, 0])
+                    out_in = np.array([0, 0])   # [num_in_texts, num_out_texts]
+
+                    # pass on every hour in the date time, and collect the data in its cell in the out_in array
                     for hour in hours_in_day_time:
                         if hour in hours_data_dic:
                             out_in += np.array(hours_data_dic[hour])
-                    try:
-                        day_times_data[day_time_index][IN].append(out_in[IN])
-                        day_times_data[day_time_index][OUT].append(out_in[OUT])
-                    except IndexError:
-                        day_times_data[day_time_index].insert(IN, [out_in[IN]])
-                        day_times_data[day_time_index].insert(OUT, [out_in[OUT]])
+
+                    # if the lists are not initialized yet
+                    if len(day_times_data[day_time_index]) == 0:
+                        day_times_data[day_time_index] = [[], []]
+
+                    day_times_data[day_time_index][IN].append(out_in[IN])
+                    day_times_data[day_time_index][OUT].append(out_in[OUT])
 
                 # for calls:
                 if self.name == 'calls':
@@ -231,7 +234,7 @@ class Sensor_Data():
         # this list will contain the calculate data itself
         avr_and_sd_list = []
 
-        # run on every data list, and contains the std & avg
+        # run on every data list, and calculates the avg & std & median & common
         for run in range(num_times):
             titles_list_tmp, avr_and_sd_list_tmp = self.calc_calculations_on_list(day_times, day_times_data, run,
                                                                                   num_times, calc_avg, calc_std,
@@ -333,7 +336,7 @@ class Sensor_Data():
                 if num_times == 1:
                     title, common = self.calc_common(day_times_data[i], day_time)
                 else:
-                    title, common = self.calc_median(day_times_data[i][run], day_time, additional_name=str(run) + '_')
+                    title, common = self.calc_common(day_times_data[i][run], day_time, additional_name=str(run) + '_')
                 titles_list.append(title), calculations_list.append(common)
 
         return titles_list, calculations_list

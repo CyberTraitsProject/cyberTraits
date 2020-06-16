@@ -34,16 +34,15 @@ def count_num_not_full_hours():
     return count
 
 
-def sum_and_list_on_screen_events_in_file(file):
+def sum_and_list_on_screen_events_in_file():
     """
     pass on every event, and if it ON event:
     1. if the next event is off, and the duration is less than 3 hours, sum it.
     2. if it is the last line, calculate the duration until end of this hour.
     3. the next event is not off - sum it as duration 0.
-    :param file: the file to read the data from (the test combined file)
     :return: the sum on time and the list of the on times durations
     """
-    power_state_df = pd.read_csv(file, usecols=['UTC time', 'event'])
+    power_state_df = pd.read_csv(combined_file, usecols=['UTC time', 'event'])
     power_state_list = power_state_df['event']
     UTC_times_list = power_state_df['UTC time']
 
@@ -106,6 +105,8 @@ def power_state_organize_all_data():
 
 # the collected data, just like the code do it
 power_state_data = power_state_organize_all_data()
+# the combined file for tests
+combined_file = combine_all_files_to_one_file(power_state_dir)
 
 
 class PowerStateTests(unittest.TestCase):
@@ -126,13 +127,11 @@ class PowerStateTests(unittest.TestCase):
 
     def test_data_collected_well(self):
         """Checks if the num_on_events and the sum_on_events_durations and the durations list collected well"""
-        combined_file = combine_all_files_to_one_file(power_state_dir)
-
         power_state_num_on_screen_event = count_num_data(power_state_data, NUM_TIMES)
         test_num_on_screen_event = count_num_strings_in_file(combined_file, 'Screen turned on', 'event')
 
         power_state_sum_on_screen_time = count_num_data(power_state_data, SUM_TIME)  # sum_on_screen_events()
-        test_sum_on_screen_time, durations_list = sum_and_list_on_screen_events_in_file(combined_file)
+        test_sum_on_screen_time, durations_list = sum_and_list_on_screen_events_in_file()
 
         power_state_num_short_on_screen_time = count_num_data(power_state_data, SHORT_ON_TIME)
         test_num_short_on_screen_time = len([1 for duration in durations_list if datetime.timedelta(minutes=duration) < datetime.timedelta(seconds=COMMON_ON_TIME)])

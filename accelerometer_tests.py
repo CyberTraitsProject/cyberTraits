@@ -4,6 +4,8 @@ from accelerometer import *
 
 # the path to the accelerometer data directory
 accelerometer_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\2ppn81sa\accelerometer'
+# the combined file for tests
+combined_file = combine_all_files_to_one_file(accelerometer_dir)
 
 
 def collect_all_xyz_lists():
@@ -19,16 +21,15 @@ def collect_all_xyz_lists():
     return x_y_z_list
 
 
-def collect_xyz_from_file(file):
+def collect_xyz_from_file():
     """
     run on the test combined file, and collect the xyz data of every second and
     every minute and every hour and every date.
     if there are numbers of data on the same date hour minute and second,
     takes the first data on it.
-    :param file: the file to read the data from (the test combined file)
     :return: the xyz lists
     """
-    accelerometer_df = pd.read_csv(file, usecols=['UTC time', 'x', 'y', 'z'])
+    accelerometer_df = pd.read_csv(combined_file, usecols=['UTC time', 'x', 'y', 'z'])
     x_list = accelerometer_df['x']
     y_list = accelerometer_df['y']
     z_list = accelerometer_df['z']
@@ -87,10 +88,8 @@ class AccelerometerTests(unittest.TestCase):
 
     def test_data_collected_well(self):
         """Checks if the xyz data collected well"""
-        combined_file = combine_all_files_to_one_file(accelerometer_dir)
-
         accelerometer_x_y_z_list = collect_all_xyz_lists()
-        test_x_y_z_list = collect_xyz_from_file(combined_file)
+        test_x_y_z_list = collect_xyz_from_file()
 
         self.assertEqual(len(accelerometer_x_y_z_list), len(test_x_y_z_list))
         self.assertEqual(round_list(accelerometer_x_y_z_list), round_list(test_x_y_z_list))
