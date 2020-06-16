@@ -9,6 +9,41 @@ OUT = 1
 IN = 0
 
 
+def calc_avg_and_std_on_file(day_time, col_type):
+    texts_df = pd.read_csv(combined_file, usecols=['UTC time', 'sent vs received'])
+    UTC_time_list = texts_df['UTC time']
+    text_type_list = texts_df['sent vs received']
+
+    # list of lists that will contain the data of every day time, data on every date
+    data_list_for_all_day_times = [[] for c_day_time in day_time]
+
+    counter_data_for_cur_date = [0 for c_day_time in day_time]
+    p_date = ''
+    for i, UTC_time in enumerate(UTC_time_list):
+        cur_date = UTC_time.split('T')[0]
+        cur_hour = (UTC_time.split('T')[1]).split(':')[0]
+
+        if cur_date != p_date and p_date:
+            # update the sum times the kind of the data appeared in this date
+            for j, c_day_time in enumerate(day_time):
+                data_list_for_all_day_times[j].append(counter_data_for_cur_date[j])
+            counter_data_for_cur_date = [0 for c_day_time in day_time]
+        p_date = cur_date
+
+        if text_type_list[i] == col_type:
+            counter_data_for_cur_date[get_day_time_index(cur_hour, day_time)] += 1
+
+    # update the last date data
+    for i, c_day_time in enumerate(day_time):
+        data_list_for_all_day_times[i].append(counter_data_for_cur_date[i])
+
+    avg_and_std_list = []
+    for i, c_day_time in enumerate(day_time):
+        avg_and_std_list.append(do_avg_on_list(data_list_for_all_day_times[i]))
+        avg_and_std_list.append(do_std_on_list(data_list_for_all_day_times[i]))
+
+    return avg_and_std_list
+
 def texts_organize_all_data():
     """
     :return: the sensor data, just like the code do it
@@ -24,6 +59,8 @@ def texts_organize_all_data():
 
 # the collected data, just like the code do it
 texts_data = texts_organize_all_data()
+# the combined file for tests
+combined_file = combine_all_files_to_one_file(texts_dir)
 
 
 class TextsTests(unittest.TestCase):
@@ -44,8 +81,6 @@ class TextsTests(unittest.TestCase):
 
     def test_data_collected_well(self):
         """Checks if the num_out_texts and the num_in_texts collected well"""
-        combined_file = combine_all_files_to_one_file(texts_dir)
-
         texts_num_out_texts = count_num_data(texts_data, OUT)
         test_num_out_texts = count_num_strings_in_file(combined_file, 'sent SMS', 'sent vs received')
 
@@ -54,6 +89,28 @@ class TextsTests(unittest.TestCase):
 
         self.assertEqual(texts_num_out_texts, test_num_out_texts)
         self.assertEqual(texts_num_in_texts, test_num_in_texts)
+
+    def test_data_calculated_well(self):
+        """Checks if the avg and std of num_out_texts and the num_in_texts calculated well for every day time"""
+        # avr_and_sd_list order is: [avg_in_dt1, std_in_dt1, ..., avg_in_dtN, std_in_dtN,
+        #                            avg_out_dt1, std_out_dt1, ..., avg_out_dtN, std_out_dtN]
+        titles_list, avr_and_sd_list = texts_data.calc_calculations_on_dic(day_times_1, num_times=2)
+
+        texts_avg_and_std_num_in_texts = avr_and_sd_list[:len(avr_and_sd_list)//2]
+        test_avg_and_std_num_in_texts = calc_avg_and_std_on_file(day_times_1, 'received SMS')
+
+        texts_avg_and_std_num_out_texts = avr_and_sd_list[len(avr_and_sd_list)//2:]
+        test_avg_and_std_num_out_texts = calc_avg_and_std_on_file(day_times_1, 'sent SMS')
+
+        print(np.round(np.array(texts_avg_and_std_num_in_texts), 4))
+        print(np.round(np.array(test_avg_and_std_num_in_texts), 4))
+
+        self.assertEqual(len(texts_avg_and_std_num_in_texts), len(test_avg_and_std_num_in_texts))
+        self.assertEqual(len(texts_avg_and_std_num_out_texts), len(test_avg_and_std_num_out_texts))
+        self.assertEqual(list(np.round(np.array(texts_avg_and_std_num_in_texts), 4)),
+                         list(np.round(np.array(test_avg_and_std_num_in_texts), 4)))
+        self.assertEqual(list(np.round(np.array(texts_avg_and_std_num_out_texts), 4)),
+                         list(np.round(np.array(test_avg_and_std_num_out_texts), 4)))
 
 
 if __name__ == '__main__':
