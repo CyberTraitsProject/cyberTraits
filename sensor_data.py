@@ -265,7 +265,7 @@ class Sensor_Data():
 
                 # calculate the average of the percent of the outgoing calls
                 all_calls = np.array(day_times_data[day_time_index][IN]) + np.array(day_times_data[day_time_index][OUT]) + np.array(day_times_data[day_time_index][MISSED])
-                percent_outgoing_calls_arr = (np.array(day_times_data[day_time_index][OUT]) / all_calls)
+                percent_outgoing_calls_arr = safe_arr_divide(np.array(day_times_data[day_time_index][OUT]), all_calls)
                 title, avg = self.calc_avg(percent_outgoing_calls_arr, day_time, additional_name='percent_outgoing_')
                 titles_list.append(title), avr_and_sd_list.append(avg)
 
@@ -372,7 +372,10 @@ class Sensor_Data():
         :param additional_name: additional name - for the title
         :return: the title and the calculated median
         """
-        median = np.median(np.array(arr))
+        if not len(arr):
+            median = 0
+        else:
+            median = np.median(np.array(arr))
         title = self.name + '_' + additional_name + str(day_time) + '_median'
         return title, median
 

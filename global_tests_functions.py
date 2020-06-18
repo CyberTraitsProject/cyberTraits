@@ -94,6 +94,8 @@ def do_std_on_list(sensor_data_list):
 
 
 def do_median_on_list(sensor_data_list):
+    if not len(sensor_data_list):
+        return 0
     return np.median(np.array(sensor_data_list))
 
 
@@ -106,10 +108,12 @@ def get_day_time_index(cur_hour, day_times):
         if int(cur_hour) in day_times[c_day_time]:
             return i
 
+
 def get_key_from_hour(hour, day_times):
     for key, hours_list in day_times.items():
         if hour in hours_list:
             return key
+
 
 def do_S_on_dic(phones_durations_dic, num_hours_in_dt):
     sum_time_in_sec = num_hours_in_dt * 60 * 60 # =T
@@ -122,6 +126,7 @@ def do_S_on_dic(phones_durations_dic, num_hours_in_dt):
         S += Fi * math.log10(Fi)
     return -1 * S
 
+
 def do_MAD_on_xyz_lists(xyz_lists, num_hours_in_dt):
     ri_list = []
     for xyz in xyz_lists:
@@ -132,3 +137,10 @@ def do_MAD_on_xyz_lists(xyz_lists, num_hours_in_dt):
         abs_list.append(abs(ri - avg_r))
     MAD = sum(abs_list) / (num_hours_in_dt * 60 * 60)
     return MAD
+
+
+def convert_nan_to_0(np_arr):
+    for i, value in enumerate(np_arr):
+        if np.isnan(value):
+            np_arr[i] = 0
+    return np_arr

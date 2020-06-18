@@ -101,7 +101,7 @@ def accelerometer_main(accelerometer_dir):
         organize_data(accelerometer_dir, curr_accelerometer_file, accelerometer_data)
 
     # send the data to the calculation function, and return the calculated data + its titles
-    return accelerometer_data.calc_calculations_on_dic(day_times_3)
+    return accelerometer_data.calc_calculations_on_dic(day_times_1)
 
 
 if __name__ == '__main__':

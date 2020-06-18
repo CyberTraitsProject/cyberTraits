@@ -3,7 +3,7 @@ from global_tests_functions import *
 from accelerometer import *
 
 # the path to the accelerometer data directory
-accelerometer_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\2ppn81sa\accelerometer'
+accelerometer_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\h2xtw6aw\accelerometer'
 # the combined file for tests
 combined_file = combine_all_files_to_one_file(accelerometer_dir)
 
@@ -144,11 +144,12 @@ class AccelerometerTests(unittest.TestCase):
 
     def test_data_calculated_well(self):
         """Checks if the avg and std of the MADs lists_in_texts calculated well for every day time"""
+        day_times = day_times_3
         # avr_and_sd_list order is: [avg_MAD_dt1, std_MAD_dt1, ..., avg_MAD_dtN, std_MAD_dtN]
-        titles_list, avr_and_sd_list = accelerometer_data.calc_calculations_on_dic(day_times_1)
+        titles_list, avr_and_sd_list = accelerometer_data.calc_calculations_on_dic(day_times)
 
         accelerometer_avg_and_std_MAD = avr_and_sd_list
-        test_avg_and_std_MAD = calc_avg_and_std_on_file(day_times_1)
+        test_avg_and_std_MAD = calc_avg_and_std_on_file(day_times)
 
         print('accelerometer_avg_and_std_MAD:', accelerometer_avg_and_std_MAD)
         print('test_avg_and_std_MAD:', test_avg_and_std_MAD)

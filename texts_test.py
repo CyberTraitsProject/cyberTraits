@@ -3,7 +3,7 @@ from global_tests_functions import *
 from texts import *
 
 # the path to the accelerometer data directory
-texts_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\2ppn81sa\texts'
+texts_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\h2xtw6aw\texts'
 
 OUT = 1
 IN = 0
@@ -92,15 +92,16 @@ class TextsTests(unittest.TestCase):
 
     def test_data_calculated_well(self):
         """Checks if the avg and std of num_out_texts and the num_in_texts calculated well for every day time"""
+        day_times = day_times_3
         # avr_and_sd_list order is: [avg_in_dt1, std_in_dt1, ..., avg_in_dtN, std_in_dtN,
         #                            avg_out_dt1, std_out_dt1, ..., avg_out_dtN, std_out_dtN]
-        titles_list, avr_and_sd_list = texts_data.calc_calculations_on_dic(day_times_1, num_times=2)
+        titles_list, avr_and_sd_list = texts_data.calc_calculations_on_dic(day_times, num_times=2)
 
         texts_avg_and_std_num_in_texts = avr_and_sd_list[:len(avr_and_sd_list)//2]
-        test_avg_and_std_num_in_texts = calc_avg_and_std_on_file(day_times_1, 'received SMS')
+        test_avg_and_std_num_in_texts = calc_avg_and_std_on_file(day_times, 'received SMS')
 
         texts_avg_and_std_num_out_texts = avr_and_sd_list[len(avr_and_sd_list)//2:]
-        test_avg_and_std_num_out_texts = calc_avg_and_std_on_file(day_times_1, 'sent SMS')
+        test_avg_and_std_num_out_texts = calc_avg_and_std_on_file(day_times, 'sent SMS')
 
         print(np.round(np.array(texts_avg_and_std_num_in_texts), 4))
         print(np.round(np.array(test_avg_and_std_num_in_texts), 4))

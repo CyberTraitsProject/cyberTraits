@@ -6,7 +6,7 @@ ON = "Screen turned on"
 OFF = "Screen turned off"
 
 # the path to the accelerometer data directory
-power_state_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\da183aw4\power_state'
+power_state_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\88rmiq3k\power_state'
 
 
 def count_num_empty_files():
@@ -86,7 +86,7 @@ def update_data_on_date(on_time, off_time, day_times, counter_data_for_cur_date)
             end_day_time = get_key_from_hour(on_time.hour, day_times)
             end_hour = day_times[end_day_time][-1]
             end_date_time = on_time.replace(hour=end_hour, minute=59, second=59, microsecond=999999)
-            duration_time = end_date_time - on_time
+            duration_time = (end_date_time - on_time).total_seconds() / 60
             counter_data_for_cur_date[i][1] += duration_time
             on_time = on_time.replace(hour=end_hour + 1, minute=0, second=0, microsecond=0)
     return counter_data_for_cur_date
@@ -176,7 +176,7 @@ def calc_avg_and_std_on_file(day_times):
     for i, c_day_time in enumerate(day_times):
         data_list_for_all_day_times[i][0].append(counter_data_for_cur_date[i][0])  # num_on_times
         data_list_for_all_day_times[i][1].append(counter_data_for_cur_date[i][1])  # sum_on_times
-        data_list_for_all_day_times[i][2].append(counter_data_for_cur_date[i][2])  # num_sh0rt_on_times
+        data_list_for_all_day_times[i][2].append(counter_data_for_cur_date[i][2])  # num_short_on_times
 
     avg_and_std_list = []
     # do avg and std on num_on_times
@@ -190,8 +190,8 @@ def calc_avg_and_std_on_file(day_times):
     # do avg on num_short_on_times and percent_short_on_times
     for i, c_day_time in enumerate(day_times):
         avg_and_std_list.append(do_avg_on_list(data_list_for_all_day_times[i][2]))
-        avg_and_std_list.append(do_avg_on_list(np.array(data_list_for_all_day_times[i][2]) /
-                                               np.array(data_list_for_all_day_times[i][0])))
+        avg_and_std_list.append(do_avg_on_list(convert_nan_to_0(np.array(data_list_for_all_day_times[i][2]) /
+                                               np.array(data_list_for_all_day_times[i][0]))))
 
     return avg_and_std_list
 
@@ -267,14 +267,15 @@ class PowerStateTests(unittest.TestCase):
 
     def test_data_calculated_well(self):
         """Checks if the avg and std of num_out_texts and the num_in_texts calculated well for every day time"""
+        day_times = day_times_3
         # avr_and_sd_list order is: [avg_num_on_times_dt1, std_num_on_times_dt1, ...,
         #                            avg_num_on_times_dtN, std_num_on_times_dtN,
         #                            avg_sum_on_times_dt1, std_sum_on_times_dt1, ...,
         #                            avg_sum_on_times_dtN, std_sum_on_times_dtN,
         #                            avg_num_short_on_times_dt1, avg_percent_num_short_on_times_dt1, ...,
         #                            avg_num_short_on_times_dtN, avg_percent_num_short_on_times_dtN]
-        titles_list, avr_and_sd_list = power_state_data.calc_calculations_on_dic(day_times_1, num_times=2)
-        all_calculated_data_on_file = calc_avg_and_std_on_file(day_times_1)
+        titles_list, avr_and_sd_list = power_state_data.calc_calculations_on_dic(day_times, num_times=2)
+        all_calculated_data_on_file = calc_avg_and_std_on_file(day_times)
 
         power_state_avg_and_std_num_on_times = avr_and_sd_list[:len(avr_and_sd_list) // 3]
         test_avg_and_std_num_on_times = all_calculated_data_on_file[:len(all_calculated_data_on_file) // 3]

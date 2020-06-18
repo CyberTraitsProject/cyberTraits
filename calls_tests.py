@@ -3,7 +3,7 @@ from global_tests_functions import *
 from calls import *
 
 # the path to the accelerometer data directory
-calls_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\2ppn81sa\calls'
+calls_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\2yct4nu4\calls'
 
 
 def count_num_outgoing_0_calls(string):
@@ -94,6 +94,7 @@ def do_calculations_on_file(day_times):
                 data_list_for_all_day_times[j][4].append(
                     do_median_on_list(counter_data_for_cur_date[j][4]))  # median of the durations list
                 all_calls_in_dt = num_out_calls_in_dt + num_in_calls_in_dt + num_missed_calls_in_dt
+                all_calls_in_dt = 1 if all_calls_in_dt == 0 else all_calls_in_dt
                 data_list_for_all_day_times[j][5].append(
                     num_out_calls_in_dt / all_calls_in_dt)  # percent outgoing calls
                 data_list_for_all_day_times[j][6].append(
@@ -132,6 +133,7 @@ def do_calculations_on_file(day_times):
         data_list_for_all_day_times[j][4].append(
             do_median_on_list(counter_data_for_cur_date[j][4]))  # median of the durations list
         all_calls_in_dt = num_out_calls_in_dt + num_in_calls_in_dt + num_missed_calls_in_dt
+        all_calls_in_dt = 1 if all_calls_in_dt == 0 else all_calls_in_dt
         data_list_for_all_day_times[j][5].append(num_out_calls_in_dt / all_calls_in_dt)  # percent outgoing calls
         data_list_for_all_day_times[j][6].append(
             do_S_on_dic(counter_data_for_cur_date[j][5] + collections.Counter(),
@@ -232,7 +234,7 @@ class CallsTests(unittest.TestCase):
         self.assertEqual(calls_sum_durations, test_sum_durations)
 
     def test_data_calculated_well(self):
-        day_times = day_times_1
+        day_times = day_times_3
         """Checks if the avg and std of num_out_calls and the num_in_calls calculated well for every day time"""
         # avr_and_sd_list order is: [avg_in_dt1, std_in_dt1, median_in_dt1, common_in_dt1, ...,
         #                            avg_in_dtN, std_in_dtN, median_in_dtN, common_in_dtN,
@@ -246,24 +248,29 @@ class CallsTests(unittest.TestCase):
                                                                            calc_common=True)
         test_calculations_list = do_calculations_on_file(day_times)
 
-        calls_avg_and_std_num_in_calls = avr_and_sd_list[:(len(avr_and_sd_list)//13) * 4 * len(day_times)]
-        test_avg_and_std_num_in_calls = test_calculations_list[:(len(test_calculations_list)//13)*4*len(day_times)]
+        calls_avg_and_std_num_in_calls = avr_and_sd_list[:4 * len(day_times)]
+        test_avg_and_std_num_in_calls = test_calculations_list[:4 * len(day_times)]
 
-        calls_avg_and_std_num_out_calls = avr_and_sd_list[(len(avr_and_sd_list) // 13) * 4 * len(day_times):(len(
-                                          avr_and_sd_list) // 13) * 8 * len(day_times)]
-        test_avg_and_std_num_out_calls = test_calculations_list[
-                                         (len(test_calculations_list) // 13) * 4 * len(day_times):(len(
-                                             test_calculations_list) // 13) * 8 * len(day_times)]
+        calls_avg_and_std_num_out_calls = avr_and_sd_list[4 * len(day_times):8 * len(day_times)]
+        test_avg_and_std_num_out_calls = test_calculations_list[4 * len(day_times):8 * len(day_times)]
 
-        calls_avg_num_missed_num_out0_median_duratin_S_calls = avr_and_sd_list[
-                                                               (len(avr_and_sd_list) // 13) * 8 * len(day_times):]
-        test_avg_num_missed_num_out0_median_duratin_S_calls = test_calculations_list[
-                                                              (len(test_calculations_list) // 13) * 8 * len(day_times):]
+        calls_avg_num_missed_num_out0_median_duratin_S_calls = avr_and_sd_list[8 * len(day_times):]
+        test_avg_num_missed_num_out0_median_duratin_S_calls = test_calculations_list[8 * len(day_times):]
 
         self.assertEqual(len(calls_avg_and_std_num_in_calls), len(test_avg_and_std_num_in_calls))
         self.assertEqual(len(calls_avg_and_std_num_out_calls), len(test_avg_and_std_num_out_calls))
         self.assertEqual(len(calls_avg_num_missed_num_out0_median_duratin_S_calls),
                          len(test_avg_num_missed_num_out0_median_duratin_S_calls))
+
+        print('calls_avg_and_std_num_in_calls:', calls_avg_and_std_num_in_calls)
+        print('test_avg_and_std_num_in_calls:', test_avg_and_std_num_in_calls)
+
+        print('calls_avg_and_std_num_out_calls:', calls_avg_and_std_num_out_calls)
+        print('test_avg_and_std_num_out_calls:', test_avg_and_std_num_out_calls)
+
+        print('calls_avg_num_missed_num_out0_median_duratin_S_calls:', calls_avg_num_missed_num_out0_median_duratin_S_calls)
+        print('test_avg_num_missed_num_out0_median_duratin_S_calls:', test_avg_num_missed_num_out0_median_duratin_S_calls)
+
         self.assertEqual(list(np.round(np.array(calls_avg_and_std_num_in_calls), 4)),
                          list(np.round(np.array(test_avg_and_std_num_in_calls), 4)))
         self.assertEqual(list(np.round(np.array(calls_avg_and_std_num_out_calls), 4)),
