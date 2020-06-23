@@ -73,7 +73,7 @@ def calls_main(calls_dir):
     # send the data to the calculation function, and return the calculated data + its titles
     # num_times=2, because the data contains two inputs that we need to calculate
     # avg, std, median and common on them- num incoming calls and num outgoing calls
-    return calls_data.calc_calculations_on_dic(day_times_1, num_times=2, calc_median=True, calc_common=True)
+    return calls_data.calc_calculations_on_dic(day_times_3, num_times=2, calc_median=True, calc_common=True)
 
 
 if __name__ == '__main__':

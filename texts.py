@@ -58,7 +58,7 @@ def texts_main(texts_dir):
 
     # send the data to the calculation function, and return the calculated data + its titles
     # num_times=2, because the data contains two inputs - num sent texts and num received texts
-    return texts_data.calc_calculations_on_dic(day_times_1, num_times=2)
+    return texts_data.calc_calculations_on_dic(day_times_3, num_times=2)
 
 
 if __name__ == '__name__':

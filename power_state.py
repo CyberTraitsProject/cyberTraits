@@ -13,6 +13,8 @@ COMMON_ON_TIME = 5
 # the max time it makes sense the phone is on
 MAX_ON_TIME = 3
 
+OFF_LIST = [OFF, SHUTDOWN]
+
 def get_list_of_power_on_durations(on_time, off_time):
     """
     calculate the duration time of every hour the phone was on in it.
@@ -135,34 +137,36 @@ def organize_data(path_dir, power_state_file, power_state_data, last_on_power_st
         # on after on - error date from the app
         if power_state == ON and last_on_power_state_date:
             # calculate the last_on_power_state_date as on time with duration 0
-            on_time = get_date_time_from_UTC_time(last_on_power_state_date)
+            on_time = last_on_power_state_date
             off_time = on_time
             durations_list = get_list_of_power_on_durations(on_time, off_time)
             # update the hour's durations in the data dic
             update_durations_in_power_states_data_dic(on_time, durations_list, power_state_data.data_dic)
             # update the number of the short duration times
             update_short_duration(on_time, off_time, power_state_data.data_dic)
-            last_on_power_state_date = None
+            last_on_power_state_date = get_date_time_from_UTC_time(UTC_times_list[i])
+            continue
 
         # the current event is off, and there was on event in the last time
-        if power_state == OFF and last_on_power_state_date:
-            on_time = get_date_time_from_UTC_time(last_on_power_state_date)
+        elif power_state in OFF_LIST and last_on_power_state_date:
+            on_time = last_on_power_state_date
             off_time = get_date_time_from_UTC_time(UTC_times_list[i])
             # we handle the last power state --> None
             last_on_power_state_date = None
 
         # the current event is not on or off, and there was on event in the last time, calculated as duration 0
-        elif last_on_power_state_date:
-            on_time = get_date_time_from_UTC_time(last_on_power_state_date)
-            off_time = on_time
-            # we handle the last power state --> None
-            last_on_power_state_date = None
+            '''elif last_on_power_state_date:
+                # TODO - to wait to the next off
+                on_time = last_on_power_state_date
+                off_time = on_time
+                # we handle the last power state --> None
+                last_on_power_state_date = None'''
 
         # the current power state is on
         elif power_state == ON:
-            on_time = get_date_time_from_UTC_time(UTC_times_list[i])
+            last_on_power_state_date = get_date_time_from_UTC_time(UTC_times_list[i])
             # we didnt reach EOF and the next event is off
-            if i + 1 < len(power_states_list) and power_states_list[i + 1] == OFF:
+            '''if i + 1 < len(power_states_list) and power_states_list[i + 1] == OFF:
                 off_time = get_date_time_from_UTC_time(UTC_times_list[i + 1])
             # we reached to EOF
             elif i + 1 == len(power_states_list):
@@ -170,10 +174,11 @@ def organize_data(path_dir, power_state_file, power_state_data, last_on_power_st
                 # return the last on event
                 # i.e. - the file finished with on event, so we need to check the next file,
                 # when the off event happened.
-                return last_on_power_state_date
+                return get_date_time_from_UTC_time(last_on_power_state_date)
             # we didnt reach EOF and the next event is not off - calculate it as duration 0
             else:
-                off_time = on_time
+                off_time = on_time'''
+            continue
 
         # another power states never mind
         else:
@@ -182,9 +187,6 @@ def organize_data(path_dir, power_state_file, power_state_data, last_on_power_st
         # send the on and the off time, to get the list of the durations.
         # (if the on and the off are not in the same hour, there is a need to divide it each duration to each hour)
         durations_list = get_list_of_power_on_durations(on_time, off_time)
-        with open('duration_times.txt', 'a') as file:
-            for duration in durations_list:
-                file.write(str(duration) + '\n')
 
         # update the hour's durations in the data dic
         update_durations_in_power_states_data_dic(on_time, durations_list, power_state_data.data_dic)
@@ -193,7 +195,7 @@ def organize_data(path_dir, power_state_file, power_state_data, last_on_power_st
         update_short_duration(on_time, off_time, power_state_data.data_dic)
 
     # the file doest finish with on power state --> return None
-    return None
+    return last_on_power_state_date
 
 
 def power_state_main(power_state_dir):
@@ -219,21 +221,20 @@ def power_state_main(power_state_dir):
 
     # handle the last on time in the last file
     if returned_value:
-        on_time = get_date_time_from_UTC_time(returned_value)
+        on_time = returned_value
         # the end of this hour
-        off_time = on_time.replace(microsecond=99, second=59, minute=59)
+        off_time = on_time.replace(microsecond=999999, second=59, minute=59)
         durations_list = get_list_of_power_on_durations(on_time, off_time)
-        with open('duration_times.txt', 'a') as file:
-            for duration in durations_list:
-                file.write(str(duration) + '\n')
         update_durations_in_power_states_data_dic(on_time, durations_list, power_state_data.data_dic)
         update_short_duration(on_time, off_time, power_state_data.data_dic)
 
     # send the data to the calculation function, and return the calculated data + its titles
     # num_times=2, because the data contains two inputs that we need to calculate
     # avg, std on them - num on power state and sum on power state
-    return power_state_data.calc_calculations_on_dic(day_times_1, num_times=2)
+    return power_state_data.calc_calculations_on_dic(day_times_3, num_times=2)
 
 
 if __name__ == '__main__':
+    #fold = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data'
+    #for folder in os.listdir(fold):
     power_state_main(r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\ygpxrisr\power_state')

@@ -42,6 +42,14 @@ day_times_24 = {
 
 ON = "Screen turned on"
 OFF = "Screen turned off"
+POWER_ON = "Power connected"
+POWER_OFF = "Power disconnected"
+SHUTDOWN = "Device shut down signal received"
+REBOOT = "Device reboot signal received"
+POWER_SAVE = "Power Save Mode state change signal received; device in power save state."
+POWER_UNSAVED = "Power Save Mode change signal received; device not in power save state."
+IDLE = "Device Idle (Doze) state change signal received; device in idle state."
+NOT_IDLE = "Device Idle (Doze) state change signal received; device not in idle state."
 
 
 def get_date_time_from_UTC_time(str):

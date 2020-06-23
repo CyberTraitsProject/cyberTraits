@@ -29,20 +29,22 @@ def global_main(app_data_dir, candidate_dir_name, sensor):
 		return [], []
 
 
-def create_csv_for_machine_learning(data_path):
+def create_csv_for_machine_learning(data_path, is_research=True):
 	"""
 	this method is main data processing method:
 	it run of every candidate that has app & questionnaires data, and calls the main sensors functions,
 	for getting its data for the machine learning.
 	at the end, save all of the data (the X data), in a csv file (without the y data).
+	:param is_research: if the current mode is "learn" or "predict"
 	:param data_path: the path to the directory that in it we have all the data we need
 	"""
 
-	# run the questionnaires code and read the questionnaires data it created
-	questionnaires_main(os.path.join(data_path, "questionnaires"))
-	questionnaires_info_file = 'questionnaires_info.pkl'
-	check_if_file_exists(questionnaires_info_file)
-	questionnaires_info = pickle.load(open(questionnaires_info_file, 'rb'))
+	if is_research:
+		# run the questionnaires code and read the questionnaires data it created
+		questionnaires_main(os.path.join(data_path, "questionnaires"))
+		questionnaires_info_file = 'questionnaires_info.pkl'
+		check_if_file_exists(questionnaires_info_file)
+		questionnaires_info = pickle.load(open(questionnaires_info_file, 'rb'))
 
 	# data_fields_list_for_machine_learning - will contain the titles of the data of the machine learning
 	# the first title - candidate_id
@@ -55,7 +57,10 @@ def create_csv_for_machine_learning(data_path):
 	# the sensors we are taking to the machine learning
 	sensors_names = ['power_state', 'calls', 'texts', 'accelerometer'] #, 'bluetooth', 'wifi', 'gps']
 
-	app_data_dir = os.path.join(data_path, "cyber_traits_data")
+	if is_research:
+		app_data_dir = os.path.join(data_path, "cyber_traits_data")
+	else:
+		app_data_dir = data_path
 	check_if_dir_exists(app_data_dir)
 
 	# for adding the title (only in the first candidate)
@@ -71,14 +76,15 @@ def create_csv_for_machine_learning(data_path):
 	for candidate_dir_name in os.listdir(app_data_dir):
 		print(candidate_dir_name)
 
-		# calculate the data for the machine learning, only for the candidates that also have questionnaires info
-		if candidate_dir_name not in questionnaires_info:
-			print("The candidate", candidate_dir_name, "doesn't have questionnaires data")
-			# the candidate doesn't have questionnaires data
-			candidates_dic[candidate_dir_name] = False
-			continue
-		# this candidate have questionnaires data
-		candidates_dic[candidate_dir_name] = True
+		if is_research:
+			# calculate the data for the machine learning, only for the candidates that also have questionnaires info
+			if candidate_dir_name not in questionnaires_info:
+				print("The candidate", candidate_dir_name, "doesn't have questionnaires data")
+				# the candidate doesn't have questionnaires data
+				candidates_dic[candidate_dir_name] = False
+				continue
+			# this candidate have questionnaires data
+			candidates_dic[candidate_dir_name] = True
 
 		# the data for the machine learning for the current candidate
 		curr_data_list_for_machine_learning = []
@@ -114,8 +120,8 @@ def create_csv_for_machine_learning(data_path):
 	np_data_for_csv_file = np.array(data_list_for_machine_learning)
 
 	# save the data in a csv file
-	machine_learning_data_path = os.path.join(data_path, "machine_learning_data.csv")
-	np.savetxt(machine_learning_data_path, np_data_for_csv_file, delimiter=',', fmt='%s')
+	machine_learning_data_file = "machine_learning_data.csv"
+	np.savetxt(machine_learning_data_file, np_data_for_csv_file, delimiter=',', fmt='%s')
 
 	# save the list of the candidates in pickle file
 	pickle.dump(candidates_dic, open('candidates_list.pkl', 'wb'))
