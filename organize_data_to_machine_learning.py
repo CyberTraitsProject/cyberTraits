@@ -28,6 +28,14 @@ def scaling_data(machine_learning_df):
     scaler = StandardScaler().fit(features.values)
     features = scaler.transform(features.values)
 
+    mean_scale_dic = {}
+    mean_list = scaler.mean_
+    scale_list = scaler.scale_
+    for i, col_name in enumerate(col_names):
+        mean_scale_dic[col_name] = {'mean': mean_list[i], 'scale': scale_list[i]}
+    # save the questionnaires info in a pickle file
+    pickle.dump(mean_scale_dic, open('mean_scale_info.pkl', 'wb'))
+
     # insert the scaled value to the data frame
     scaled_features[col_names] = features
 
@@ -153,7 +161,7 @@ def organize_data_to_machine_learning_main():
     questionnaires_info = pickle.load(open(questionnaires_info_file, 'rb'))
 
     # open the machine learning file
-    machine_learning_file = "machine_learning_data.csv"
+    machine_learning_file = "machine_learning_data_day_times_3.csv"
     check_if_file_exists(machine_learning_file)
     machine_learning_df = pd.read_csv(machine_learning_file)
 

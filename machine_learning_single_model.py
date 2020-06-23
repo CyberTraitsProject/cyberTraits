@@ -1,3 +1,5 @@
+import pickle
+
 import pandas as pd
 from sklearn.linear_model import LinearRegression, RANSACRegressor
 from sklearn.svm import SVC
@@ -17,20 +19,13 @@ from sklearn.metrics import confusion_matrix, mean_squared_error
 # from xgboost import XGBClassifier
 import joblib
 
-classifier_models = [RandomForestClassifier(), SVC(), KNeighborsClassifier(n_neighbors=4),
-                     GaussianProcessClassifier(1.0*RBF(1.0)), DecisionTreeClassifier(max_depth=5),
-                     MLPClassifier(alpha=1, max_iter=1000), AdaBoostClassifier(), GaussianNB()]
-classifier_models_n = ['RandomForestClassifier()', 'SVC()', 'KNeighborsClassifier(n_neighbors=4)',
-                       'GaussianProcessClassifier(1.0*RBF(1.0))', 'DecisionTreeClassifier(max_depth=5)',
-                       'MLPClassifier(alpha=1, max_iter=1000)', 'AdaBoostClassifier()', 'GaussianNB()']
-regression_models = [LinearRegression(), RandomForestRegressor(max_depth=None, random_state=0),
-                     RANSACRegressor(random_state=42, min_samples=3), KNeighborsRegressor(),
-                     # GaussianProcessRegressor(),
-                     DecisionTreeRegressor(), MLPRegressor()]
-regression_models_n = ['LinearRegression()', 'RandomForestRegressor(max_depth=None, random_state=0)',
-                       'RANSACRegressor(random_state=42, min_samples=3)', 'KNeighborsRegressor()',
-                        # 'GaussianProcessRegressor()',
-                        'DecisionTreeRegressor()', 'MLPRegressor()']
+
+classifier_model = RandomForestClassifier()
+classifier_model_n = 'RandomForestClassifier()'
+regression_model = RandomForestRegressor(max_depth=None, random_state=0)
+regression_model_n = 'RandomForestRegressor(max_depth=None, random_state=0)'
+
+trait_bets_columns_dic = {}
 
 
 def check_model(file, X_train, X_test, y_train, y_test, model, trait_name, classifier):
@@ -48,29 +43,22 @@ def check_model(file, X_train, X_test, y_train, y_test, model, trait_name, class
 
     # fit the model on the train data
     model.fit(X_train, y_train)
-    # predict the test data
-    y_pred = model.predict(X_test)
-
     # Save the model as a pickle in a file
     joblib.dump(model, f'{trait_name}_model.pkl')
-
-    # file.write('y_test: ' + str(y_test) + '\n')
-    # file.write('y_pred: ' + str(y_pred) + '\n')
+    # predict the test data
+    y_pred = model.predict(X_test)
     if classifier:
-        # run the confusion matrix and check the score
-        # file.write('confusion_matrix: ' + str(confusion_matrix(y_test, y_pred, labels=[1, 2, 3, 4])) + '\n')
         # return the mean accuracy on the given test data and labels -
         # return the fraction of correctly classified samples
-        score = model.score(X_test, y_test)
-        file.write('test score: ' + str(score) + '\n')
-        score = model.score(X_train, y_train)
-        file.write('train score: ' + str(score) + '\n')
+        test_score = model.score(X_test, y_test)
+        train_score = model.score(X_train, y_train)
     else:
         # check the RSS
         # = (y_pred_1 - y_true_1)^2 + (y_pred_2 - y_true_2)^2 + ... + (y_pred_n - y_true_n)^2
-        file.write('test mean_squared_error:' + str(mean_squared_error(y_test, y_pred)) + '\n')
-        y_train_pred = model.predict(X_train)
-        file.write('train mean_squared_error:' + str(mean_squared_error(y_train, y_train_pred)) + '\n')
+        test_score = mean_squared_error(y_test, y_pred)
+        train_score = mean_squared_error(y_train, model.predict(X_train))
+
+    return test_score, train_score
 
 
 def run_ml_model_on_every_combination(file, X_train, X_test, y_train, y_test, trait_name, classifier):
@@ -89,33 +77,63 @@ def run_ml_model_on_every_combination(file, X_train, X_test, y_train, y_test, tr
     # the number of the columns in the train data
     num_columns = len(X_train.columns)
     columns_indexes = range(num_columns)
+    columns_best_indexes = []
+    columns_best_names = []
+    i = 0
+    # while len(columns_best_indexes) < num_columns:
+    while i < 3:
+        print(i)
+        i += 1
+        models_results = []
+        models_indexes = []
+        train_models_results = []
 
-    # all the combinations - 3 from N, without replacement
-    # combinations_list = list(itertools.combinations(columns_indexes, 3))
-    combinations_list = [columns_indexes]
-    # run on every set, and run all the machine learning models
-    for columns_indexes_3 in combinations_list:
-        columns_indexes_3_list = list(columns_indexes_3)
-        cols_names = X_train.columns[columns_indexes_3_list]
-        # file.write('current combination cols names: ' + str(cols_names) + '\n')
-        # takes only the 3 columns
-        X_curr_train = X_train[cols_names]
-        X_curr_test = X_test[cols_names]
-        # the y values are the same
-        y_curr_train = y_train
-        y_curr_test = y_test
+        for index in columns_indexes:
 
-        # pass on every machine learning model, and run it on the current data
+            if index in columns_best_indexes:
+                continue
+            else:
+                columns_indexes_list = columns_best_indexes + [index]
+
+            cols_names = X_train.columns[columns_indexes_list]
+            # file.write('current combination cols names: ' + str(cols_names) + '\n')
+            # takes only the 3 columns
+            X_curr_train = X_train[cols_names]
+            X_curr_test = X_test[cols_names]
+            # the y values are the same
+            y_curr_train = y_train
+            y_curr_test = y_test
+
+            # pass on every machine learning model, and run it on the current data
+            if classifier:
+                test_score, train_score = check_model(file, X_curr_train, X_curr_test, y_curr_train, y_curr_test,
+                                                      classifier_model, trait_name, classifier)
+            else:
+                test_score, train_score = check_model(file, X_curr_train, X_curr_test, y_curr_train, y_curr_test,
+                                                      regression_model, trait_name, classifier)
+
+            models_indexes.append(columns_indexes_list)
+            models_results.append(test_score)
+            train_models_results.append(train_score)
+
         if classifier:
-            for i, classifier_model in enumerate(classifier_models):
-                file.write('the model: ' + str(classifier_models_n[i]) + '\n')
-                check_model(file, X_curr_train, X_curr_test, y_curr_train, y_curr_test, classifier_model, trait_name, classifier)
-                file.write('\n')
+            best_score = max(models_results)
         else:
-            for i, regression_model in enumerate(regression_models):
-                file.write('the model: ' + str(regression_models_n[i]) + '\n')
-                check_model(file, X_curr_train, X_curr_test, y_curr_train, y_curr_test, regression_model, trait_name, classifier)
-                file.write('\n')
+            best_score = min(models_results)
+
+        index_best_score = models_results.index(best_score)
+        columns_best_indexes = models_indexes[index_best_score]
+        best_train_score = train_models_results[index_best_score]
+        columns_best_names = list(X_train.columns[columns_best_indexes])
+
+        file.write('columns indexes: ' + str(columns_best_indexes) + '\n')
+        file.write('columns names: ' + str(columns_best_names) + '\n')
+        file.write('test score:' + str(best_score) + '\n')
+        file.write('train score:' + str(best_train_score) + '\n\n')
+
+    # TODO - to decide what are the best columns, to send them,
+    #  and to write the model that created to a pickle file.
+    return list(columns_best_names)
 
 
 def machine_learning_model_main(file, machine_learning_data_path, trait_name, classifier=False):
@@ -147,11 +165,16 @@ def machine_learning_model_main(file, machine_learning_data_path, trait_name, cl
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42, shuffle=True)
 
-    run_ml_model_on_every_combination(file, X_train, X_test, y_train, y_test, trait_name, classifier)
+    columns_best_names = run_ml_model_on_every_combination(file, X_train, X_test, y_train, y_test, trait_name, classifier)
+    trait_bets_columns_dic[trait_name] = columns_best_names
 
 
 if __name__ == '__main__':
-    file = open('machine_learning_results.txt', 'w')
+
+    file = open('model_results.txt', 'w')
+    file.write('The Classifier Model : ' + classifier_model_n + '\n')
+    file.write('The Regression Model : ' + regression_model_n + '\n')
+
     # run the models on all of the traits, for the trait 'Style' - run a classifier model
     for trait in traits_names:
         file.write(str(trait) + ':\n')
@@ -161,3 +184,4 @@ if __name__ == '__main__':
         else:
             machine_learning_model_main(file, machine_learning_trait_file, trait)
     file.close()
+    pickle.dump(trait_bets_columns_dic, open('trait_cols_names_info.pkl', 'wb'))
