@@ -20,43 +20,29 @@ from sklearn.metrics import confusion_matrix, mean_squared_error
 import joblib
 
 
-classifier_model = RandomForestClassifier()
-classifier_model_n = 'RandomForestClassifier()'
-regression_model = RandomForestRegressor(max_depth=None, random_state=0)
-regression_model_n = 'RandomForestRegressor(max_depth=None, random_state=0)'
+classifier_model = AdaBoostClassifier()
+classifier_model_n = 'AdaBoostClassifier()'
+regression_model = RANSACRegressor(random_state=42, min_samples=3)
+regression_model_n = 'RANSACRegressor(random_state=42, min_samples=3)'
 
 trait_bets_columns_dic = {}
 
 
-def check_model(file, X_train, X_test, y_train, y_test, model, trait_name, classifier):
+def check_model(X_train, X_test, y_train, y_test, model):
     """
     gets a model, fit it on the data and checks the results.
-    write them in the file.
-    :param file: the file to write there the results
     :param X_train: the X train data
     :param X_test: the X test data
     :param y_train: the y train data
     :param y_test: the y test data
-    :param classifier: is a classifier problem or a regression problem
     :param model: the machine learning model
     """
 
     # fit the model on the train data
     model.fit(X_train, y_train)
-    # Save the model as a pickle in a file
-    #joblib.dump(model, os.path.join('traits_models', f'{trait_name}_{i}_model.pkl'))
     # predict the test data
-    y_pred = model.predict(X_test)
-    if classifier:
-        # return the mean accuracy on the given test data and labels -
-        # return the fraction of correctly classified samples
-        test_score = model.score(X_test, y_test)
-        train_score = model.score(X_train, y_train)
-    else:
-        # check the RSS
-        # = (y_pred_1 - y_true_1)^2 + (y_pred_2 - y_true_2)^2 + ... + (y_pred_n - y_true_n)^2
-        test_score = mean_squared_error(y_test, y_pred)
-        train_score = mean_squared_error(y_train, model.predict(X_train))
+    test_score = model.score(X_test, y_test)
+    train_score = model.score(X_train, y_train)
 
     return test_score, train_score, model
 
@@ -112,20 +98,17 @@ def run_ml_model_on_every_combination(file, X_train, X_test, y_train, y_test, tr
 
             # pass on every machine learning model, and run it on the current data
             if classifier:
-                test_score, train_score, model = check_model(file, X_curr_train, X_curr_test, y_curr_train, y_curr_test,
-                                                      classifier_model, trait_name, classifier)
+                test_score, train_score, model = check_model(X_curr_train, X_curr_test, y_curr_train, y_curr_test,
+                                                             classifier_model)
             else:
-                test_score, train_score, model = check_model(file, X_curr_train, X_curr_test, y_curr_train, y_curr_test,
-                                                      regression_model, trait_name, classifier)
+                test_score, train_score, model = check_model(X_curr_train, X_curr_test, y_curr_train, y_curr_test,
+                                                             regression_model)
 
             models_indexes.append(columns_indexes_list)
             models_results.append(test_score)
             train_models_results.append(train_score)
 
-        if classifier:
-            best_score = max(models_results)
-        else:
-            best_score = min(models_results)
+        best_score = max(models_results)
 
         index_best_score = models_results.index(best_score)
         columns_best_indexes = models_indexes[index_best_score]
@@ -142,16 +125,12 @@ def run_ml_model_on_every_combination(file, X_train, X_test, y_train, y_test, tr
         file.write('test score:' + str(best_score) + '\n')
         file.write('train score:' + str(best_train_score) + '\n\n')
 
-    if classifier:
-        best_final_score = max(columns_scores_models_dic)
-    else:
-        best_final_score = min(columns_scores_models_dic)
+    best_final_score = max(columns_scores_models_dic)
 
     columns_best_final_names = columns_scores_models_dic[best_final_score]['columns_names']
+    # Save the model as a pickle in a file
     joblib.dump(model, os.path.join('traits_models', f'{trait_name}_model.pkl'))
 
-    # TODO - to decide what are the best columns, to send them,
-    #  and to write the model that created to a pickle file.
     return list(columns_best_final_names)
 
 
@@ -197,7 +176,7 @@ if __name__ == '__main__':
     # run the models on all of the traits, for the trait 'Style' - run a classifier model
     for trait in traits_names:
         file.write(str(trait) + ':\n')
-        machine_learning_trait_file = f"C:/Users/onaki/CyberTraits/cyberTraits/machine_learning_data_{trait}.csv"
+        machine_learning_trait_file = f'machine_learning_data_{trait}.csv'
         if trait == 'Style':
             machine_learning_model_main(file, machine_learning_trait_file, trait, classifier=True)
         else:
