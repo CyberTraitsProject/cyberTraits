@@ -44,7 +44,7 @@ def check_model(file, X_train, X_test, y_train, y_test, model, trait_name, class
     # fit the model on the train data
     model.fit(X_train, y_train)
     # Save the model as a pickle in a file
-    joblib.dump(model, os.path.join('traits_models', f'{trait_name}_model.pkl'))
+    #joblib.dump(model, os.path.join('traits_models', f'{trait_name}_{i}_model.pkl'))
     # predict the test data
     y_pred = model.predict(X_test)
     if classifier:
@@ -58,7 +58,7 @@ def check_model(file, X_train, X_test, y_train, y_test, model, trait_name, class
         test_score = mean_squared_error(y_test, y_pred)
         train_score = mean_squared_error(y_train, model.predict(X_train))
 
-    return test_score, train_score
+    return test_score, train_score, model
 
 
 def run_ml_model_on_every_combination(file, X_train, X_test, y_train, y_test, trait_name, classifier):
@@ -74,14 +74,20 @@ def run_ml_model_on_every_combination(file, X_train, X_test, y_train, y_test, tr
     :param classifier: is a classifier problem or a regression problem
     """
 
+    # will contain for every test score, its columns and model.
+    # columns_scores_models_dic = { score_1 : {columns_names: [...], model: ML_model_1},
+    #                               score_2 : {columns_names: [...], model: ML_model_2}, ... ,
+    #                               score_n : {columns_names: [...], model: ML_model_n}}
+    columns_scores_models_dic = {}
+
     # the number of the columns in the train data
     num_columns = len(X_train.columns)
     columns_indexes = range(num_columns)
     columns_best_indexes = []
     columns_best_names = []
+    model = ''
     i = 0
-    # while len(columns_best_indexes) < num_columns:
-    while i < 3:
+    while len(columns_best_indexes) < num_columns:
         print(i)
         i += 1
         models_results = []
@@ -106,10 +112,10 @@ def run_ml_model_on_every_combination(file, X_train, X_test, y_train, y_test, tr
 
             # pass on every machine learning model, and run it on the current data
             if classifier:
-                test_score, train_score = check_model(file, X_curr_train, X_curr_test, y_curr_train, y_curr_test,
+                test_score, train_score, model = check_model(file, X_curr_train, X_curr_test, y_curr_train, y_curr_test,
                                                       classifier_model, trait_name, classifier)
             else:
-                test_score, train_score = check_model(file, X_curr_train, X_curr_test, y_curr_train, y_curr_test,
+                test_score, train_score, model = check_model(file, X_curr_train, X_curr_test, y_curr_train, y_curr_test,
                                                       regression_model, trait_name, classifier)
 
             models_indexes.append(columns_indexes_list)
@@ -126,14 +132,27 @@ def run_ml_model_on_every_combination(file, X_train, X_test, y_train, y_test, tr
         best_train_score = train_models_results[index_best_score]
         columns_best_names = list(X_train.columns[columns_best_indexes])
 
+        if best_score not in columns_scores_models_dic:
+            columns_scores_models_dic[best_score] = {}
+            columns_scores_models_dic[best_score]['columns_names'] = columns_best_names
+            columns_scores_models_dic[best_score]['model'] = model
+
         file.write('columns indexes: ' + str(columns_best_indexes) + '\n')
         file.write('columns names: ' + str(columns_best_names) + '\n')
         file.write('test score:' + str(best_score) + '\n')
         file.write('train score:' + str(best_train_score) + '\n\n')
 
+    if classifier:
+        best_final_score = max(columns_scores_models_dic)
+    else:
+        best_final_score = min(columns_scores_models_dic)
+
+    columns_best_final_names = columns_scores_models_dic[best_final_score]['columns_names']
+    joblib.dump(model, os.path.join('traits_models', f'{trait_name}_model.pkl'))
+
     # TODO - to decide what are the best columns, to send them,
     #  and to write the model that created to a pickle file.
-    return list(columns_best_names)
+    return list(columns_best_final_names)
 
 
 def machine_learning_model_main(file, machine_learning_data_path, trait_name, classifier=False):
