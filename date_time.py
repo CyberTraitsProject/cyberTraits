@@ -51,6 +51,10 @@ POWER_UNSAVED = "Power Save Mode change signal received; device not in power sav
 IDLE = "Device Idle (Doze) state change signal received; device in idle state."
 NOT_IDLE = "Device Idle (Doze) state change signal received; device not in idle state."
 
+day_times = day_times_1
+
+NUM_TESTED_DATES = 7
+
 
 def get_date_time_from_UTC_time(str):
     """
@@ -74,6 +78,14 @@ def get_date_from_file_name(file_name):
     :return: the date of the UTC time, in string variable
     """
     return file_name.split(' ')[0]
+
+
+def get_hour_from_file_name(file_name):
+    """
+    :param file_name: file name, that contains UTC time. format for example - "2020-04-21 07_00_00.csv"
+    :return: the date of the UTC time, in string variable
+    """
+    return int((file_name.split(' ')[1]).split('_')[0])
 
 
 def check_day_time_structure(day_times):

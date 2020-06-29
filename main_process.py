@@ -58,7 +58,7 @@ def create_csv_for_machine_learning(data_path, is_research=True):
 	sensors_names = ['power_state', 'calls', 'texts', 'accelerometer'] #, 'bluetooth', 'wifi', 'gps']
 
 	if is_research:
-		app_data_dir = os.path.join(data_path, "cyber_traits_data")
+		app_data_dir = os.path.join(data_path, "cyber_traits_data_edited")
 	else:
 		app_data_dir = data_path
 	check_if_dir_exists(app_data_dir)

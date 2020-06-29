@@ -2,11 +2,8 @@ import unittest
 from global_tests_functions import *
 from calls import *
 
-# the path to the accelerometer data directory
-calls_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\2yct4nu4\calls'
 
-
-def count_num_outgoing_0_calls(string):
+def count_num_outgoing_0_calls(string, combined_file):
     """
     :param string: the string to find
     :return: the number of the outgoing calls with durations 0
@@ -15,7 +12,7 @@ def count_num_outgoing_0_calls(string):
     return texts_df[(texts_df['call type'] == string) & (texts_df['duration in seconds'] == 0)].shape[0]
 
 
-def collect_all_durations_list():
+def collect_all_durations_list(calls_data):
     """
     :return: the durations list from the sensor data
     """
@@ -26,7 +23,7 @@ def collect_all_durations_list():
     return durations_list
 
 
-def collect_all_durations_from_file():
+def collect_all_durations_from_file(combined_file):
     """
     :return: the durations list from the combined file (test data)
     """
@@ -34,7 +31,7 @@ def collect_all_durations_from_file():
     return list(calls_df['duration in seconds'])
 
 
-def collect_all_contacts():
+def collect_all_contacts(calls_data):
     """
     :return: the sorted list of the contacts numbers, from the sensor data
     """
@@ -45,7 +42,7 @@ def collect_all_contacts():
     return sorted(list(np.unique(contacts_list)))
 
 
-def collect_all_contacts_from_file():
+def collect_all_contacts_from_file(combined_file):
     """
     :return: the sorted list of the contacts numbers, from the combine file (test data)
     """
@@ -53,7 +50,7 @@ def collect_all_contacts_from_file():
     return sorted(list(np.unique(calls_df['hashed phone number'])))
 
 
-def sum_durations_for_contacts():
+def sum_durations_for_contacts(calls_data):
     """
     :return: the sum of the calls durations from the sensor data
     """
@@ -64,7 +61,7 @@ def sum_durations_for_contacts():
     return sum_dur
 
 
-def do_calculations_on_file(day_times):
+def do_calculations_on_file(day_times, combined_file):
     calls_df = pd.read_csv(combined_file, usecols=['UTC time', 'hashed phone number', 'call type', 'duration in seconds'])
     UTC_time_list = calls_df['UTC time']
     phones_list = calls_df['hashed phone number']
@@ -163,7 +160,7 @@ def do_calculations_on_file(day_times):
     return avg_and_std_list
 
 
-def calls_organize_all_data():
+def calls_organize_all_data(calls_dir):
     """
     :return: the sensor data, just like the code do it
     """
@@ -176,25 +173,28 @@ def calls_organize_all_data():
     return calls_data
 
 
-# the collected data, just like the code do it
-calls_data = calls_organize_all_data()
-# the combined file for tests
-combined_file = combine_all_files_to_one_file(calls_dir)
-
-
 class CallsTests(unittest.TestCase):
+
+    def setUp(self):
+        # the path to the accelerometer data directory
+        self.calls_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data_edited\2pe2t6si\calls'
+        # the collected data, just like the code do it
+        self.calls_data = calls_organize_all_data(self.calls_dir)
+        # the combined file for tests
+        self.combined_file = combine_all_files_to_one_file(self.calls_dir)
 
     def test_number_of_dates(self):
         """Checks if the number of the dates we collected is true"""
-        calls_num_dates = len(calls_data.data_dic)
-        test_num_dates = count_num_dates(calls_dir)
+        calls_num_dates = len(self.calls_data.data_dic)
+        test_num_dates = count_num_dates(self.calls_dir)
 
+        self.assertEqual(calls_num_dates, NUM_TESTED_DATES)
         self.assertEqual(calls_num_dates, test_num_dates)
 
     def test_number_of_hours(self):
         """Checks if the number of the hours we collected is true"""
-        calls_num_hours = sum([len(calls_data.data_dic[date]) for date in calls_data.data_dic])
-        test_num_hours = count_num_hours(calls_dir)
+        calls_num_hours = sum([len(self.calls_data.data_dic[date]) for date in self.calls_data.data_dic])
+        test_num_hours = count_num_hours(self.calls_dir)
 
         self.assertEqual(calls_num_hours, test_num_hours)
 
@@ -202,27 +202,27 @@ class CallsTests(unittest.TestCase):
         """Checks if the num_out_calls and the num_in_calls and num_missed_calls
          and num_out_0_calls the calls durations list and the contacts list
         and the sum durations calls time are collected well"""
-        combined_file = combine_all_files_to_one_file(calls_dir)
+        combined_file = combine_all_files_to_one_file(self.calls_dir)
 
-        calls_num_out_calls = count_num_data(calls_data, OUT)
+        calls_num_out_calls = count_num_data(self.calls_data, OUT)
         test_num_out_calls = count_num_strings_in_file(combined_file, 'Outgoing Call', 'call type')
 
-        calls_num_in_calls = count_num_data(calls_data, IN)
+        calls_num_in_calls = count_num_data(self.calls_data, IN)
         test_num_in_calls = count_num_strings_in_file(combined_file, 'Incoming Call', 'call type')
 
-        calls_num_missed_calls = count_num_data(calls_data, MISSED)
+        calls_num_missed_calls = count_num_data(self.calls_data, MISSED)
         test_num_missed_calls = count_num_strings_in_file(combined_file, 'Missed Call', 'call type')
 
-        calls_num_out_0_calls = count_num_data(calls_data, OUT_0)
-        test_num_out_0_calls = count_num_outgoing_0_calls('Outgoing Call')
+        calls_num_out_0_calls = count_num_data(self.calls_data, OUT_0)
+        test_num_out_0_calls = count_num_outgoing_0_calls('Outgoing Call', self.combined_file)
 
-        calls_durations_list = collect_all_durations_list()
-        test_durations_list = collect_all_durations_from_file()
+        calls_durations_list = collect_all_durations_list(self.calls_data)
+        test_durations_list = collect_all_durations_from_file(self.combined_file)
 
-        calls_contacts_list = collect_all_contacts()
-        test_contacts_list = collect_all_contacts_from_file()
+        calls_contacts_list = collect_all_contacts(self.calls_data)
+        test_contacts_list = collect_all_contacts_from_file(self.combined_file)
 
-        calls_sum_durations = sum_durations_for_contacts()
+        calls_sum_durations = sum_durations_for_contacts(self.calls_data)
         test_sum_durations = sum(test_durations_list)
 
         self.assertEqual(calls_num_out_calls, test_num_out_calls)
@@ -234,7 +234,6 @@ class CallsTests(unittest.TestCase):
         self.assertEqual(calls_sum_durations, test_sum_durations)
 
     def test_data_calculated_well(self):
-        day_times = day_times_3
         """Checks if the avg and std of num_out_calls and the num_in_calls calculated well for every day time"""
         # avr_and_sd_list order is: [avg_in_dt1, std_in_dt1, median_in_dt1, common_in_dt1, ...,
         #                            avg_in_dtN, std_in_dtN, median_in_dtN, common_in_dtN,
@@ -244,9 +243,9 @@ class CallsTests(unittest.TestCase):
         #                            avg_percent_out_dt1, avg_S_dt1, ...,
         #                            avg_missed_dtN, avg_out_0_dtN, avg_median_duration_dtN,
         #                            avg_percent_out_dtN, avg_S_dtN]
-        titles_list, avr_and_sd_list = calls_data.calc_calculations_on_dic(day_times, num_times=2, calc_median=True,
+        titles_list, avr_and_sd_list = self.calls_data.calc_calculations_on_dic(day_times, num_times=2, calc_median=True,
                                                                            calc_common=True)
-        test_calculations_list = do_calculations_on_file(day_times)
+        test_calculations_list = do_calculations_on_file(day_times, self.combined_file)
 
         calls_avg_and_std_num_in_calls = avr_and_sd_list[:4 * len(day_times)]
         test_avg_and_std_num_in_calls = test_calculations_list[:4 * len(day_times)]

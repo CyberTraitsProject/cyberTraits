@@ -2,13 +2,8 @@ import unittest
 from global_tests_functions import *
 from accelerometer import *
 
-# the path to the accelerometer data directory
-accelerometer_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\h2xtw6aw\accelerometer'
-# the combined file for tests
-combined_file = combine_all_files_to_one_file(accelerometer_dir)
 
-
-def collect_all_xyz_lists():
+def collect_all_xyz_lists(accelerometer_data):
     """
     run on the data in the dic, in collect the xyz_list of every date and every hour,
     to one list.
@@ -21,7 +16,7 @@ def collect_all_xyz_lists():
     return x_y_z_list
 
 
-def collect_xyz_from_file():
+def collect_xyz_from_file(combined_file):
     """
     run on the test combined file, and collect the xyz data of every second and
     every minute and every hour and every date.
@@ -53,7 +48,7 @@ def collect_xyz_from_file():
     return xyz_list
 
 
-def calc_avg_and_std_on_file(day_times):
+def calc_avg_and_std_on_file(day_times, combined_file):
     accelerometer_df = pd.read_csv(combined_file, usecols=['UTC time', 'x', 'y', 'z'])
     UTC_time_list = accelerometer_df['UTC time']
     x_list = accelerometer_df['x']
@@ -101,7 +96,7 @@ def calc_avg_and_std_on_file(day_times):
     return avg_and_std_list
 
 
-def accelerometer_organize_all_data():
+def accelerometer_organize_all_data(accelerometer_dir):
     """
     :return: the sensor data, just like the code do it
     """
@@ -114,47 +109,51 @@ def accelerometer_organize_all_data():
     return accelerometer_data
 
 
-# the collected data, just like the code do it
-accelerometer_data = accelerometer_organize_all_data()
-
-
 class AccelerometerTests(unittest.TestCase):
+
+    def setUp(self):
+        # the path to the accelerometer data directory
+        self.accelerometer_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data_edited\2pe2t6si\accelerometer'
+        # the collected data, just like the code do it
+        self.accelerometer_data = accelerometer_organize_all_data(self.accelerometer_dir)
+        # the combined file for tests
+        self.combined_file = combine_all_files_to_one_file(self.accelerometer_dir)
 
     def test_number_of_dates(self):
         """Checks if the number of the dates we collected is true"""
-        accelerometer_num_dates = len(accelerometer_data.data_dic)
-        test_num_dates = count_num_dates(accelerometer_dir)
+        accelerometer_num_dates = len(self.accelerometer_data.data_dic)
+        test_num_dates = count_num_dates(self.accelerometer_dir)
 
         self.assertEqual(accelerometer_num_dates, test_num_dates)
+        self.assertEqual(accelerometer_num_dates, NUM_TESTED_DATES)
 
     def test_number_of_hours(self):
         """Checks if the number of the hours we collected is true"""
-        accelerometer_num_hours = sum([len(accelerometer_data.data_dic[date]) for date in accelerometer_data.data_dic])
-        test_num_hours = count_num_hours(accelerometer_dir)
+        accelerometer_num_hours = sum([len(self.accelerometer_data.data_dic[date]) for date in self.accelerometer_data.data_dic])
+        test_num_hours = count_num_hours(self.accelerometer_dir)
 
         self.assertEqual(accelerometer_num_hours, test_num_hours)
 
     def test_data_collected_well(self):
         """Checks if the xyz data collected well"""
-        accelerometer_x_y_z_list = collect_all_xyz_lists()
-        test_x_y_z_list = collect_xyz_from_file()
+        accelerometer_x_y_z_list = collect_all_xyz_lists(self.accelerometer_data)
+        test_x_y_z_list = collect_xyz_from_file(self.combined_file)
 
         self.assertEqual(len(accelerometer_x_y_z_list), len(test_x_y_z_list))
         self.assertEqual(round_list(accelerometer_x_y_z_list), round_list(test_x_y_z_list))
 
     def test_data_calculated_well(self):
         """Checks if the avg and std of the MADs lists_in_texts calculated well for every day time"""
-        day_times = day_times_3
         # avr_and_sd_list order is: [avg_MAD_dt1, std_MAD_dt1, ..., avg_MAD_dtN, std_MAD_dtN]
-        titles_list, avr_and_sd_list = accelerometer_data.calc_calculations_on_dic(day_times)
+        titles_list, avr_and_sd_list = self.accelerometer_data.calc_calculations_on_dic(day_times)
 
         accelerometer_avg_and_std_MAD = avr_and_sd_list
-        test_avg_and_std_MAD = calc_avg_and_std_on_file(day_times)
+        test_avg_and_std_MAD = calc_avg_and_std_on_file(day_times, self.combined_file)
 
         print('accelerometer_avg_and_std_MAD:', accelerometer_avg_and_std_MAD)
         print('test_avg_and_std_MAD:', test_avg_and_std_MAD)
 
-        #self.assertEqual(len(accelerometer_avg_and_std_MAD), len(test_avg_and_std_MAD))
+        self.assertEqual(len(accelerometer_avg_and_std_MAD), len(test_avg_and_std_MAD))
         self.assertEqual(list(np.round(np.array(accelerometer_avg_and_std_MAD), 10)),
                          list(np.round(np.array(test_avg_and_std_MAD), 10)))
 

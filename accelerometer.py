@@ -74,7 +74,7 @@ def organize_data(path_dir, accelerometer_file, accelerometer_data):
     '''
     # get the date and the hour
     date = get_date_from_file_name(accelerometer_file)
-    hour = curr_date_time.hour
+    hour = get_hour_from_file_name(accelerometer_file)
 
     # if it is a new date -> add it to the dictionary
     if date not in accelerometer_data.data_dic:
@@ -101,7 +101,7 @@ def accelerometer_main(accelerometer_dir):
         organize_data(accelerometer_dir, curr_accelerometer_file, accelerometer_data)
 
     # send the data to the calculation function, and return the calculated data + its titles
-    return accelerometer_data.calc_calculations_on_dic(day_times_3)
+    return accelerometer_data.calc_calculations_on_dic(day_times)
 
 
 if __name__ == '__main__':

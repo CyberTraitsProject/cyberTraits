@@ -2,14 +2,11 @@ import unittest
 from global_tests_functions import *
 from texts import *
 
-# the path to the accelerometer data directory
-texts_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\h2xtw6aw\texts'
-
 OUT = 1
 IN = 0
 
 
-def calc_avg_and_std_on_file(day_time, col_type):
+def calc_avg_and_std_on_file(day_time, col_type, combined_file):
     texts_df = pd.read_csv(combined_file, usecols=['UTC time', 'sent vs received'])
     UTC_time_list = texts_df['UTC time']
     text_type_list = texts_df['sent vs received']
@@ -44,7 +41,8 @@ def calc_avg_and_std_on_file(day_time, col_type):
 
     return avg_and_std_list
 
-def texts_organize_all_data():
+
+def texts_organize_all_data(texts_dir):
     """
     :return: the sensor data, just like the code do it
     """
@@ -57,51 +55,53 @@ def texts_organize_all_data():
     return texts_data
 
 
-# the collected data, just like the code do it
-texts_data = texts_organize_all_data()
-# the combined file for tests
-combined_file = combine_all_files_to_one_file(texts_dir)
-
-
 class TextsTests(unittest.TestCase):
+
+    def setUp(self):
+        # the path to the accelerometer data directory
+        self.texts_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data_edited\ygpxrisr\texts'
+        # the collected data, just like the code do it
+        self.texts_data = texts_organize_all_data(self.texts_dir)
+        # the combined file for tests
+        self.combined_file = combine_all_files_to_one_file(self.texts_dir)
 
     def test_number_of_dates(self):
         """Checks if the number of the dates we collected is true"""
-        texts_num_dates = len(texts_data.data_dic)
-        test_num_dates = count_num_dates(texts_dir)
+        texts_num_dates = len(self.texts_data.data_dic)
+        test_num_dates = count_num_dates(self.texts_dir)
 
         self.assertEqual(texts_num_dates, test_num_dates)
+        self.assertEqual(texts_num_dates, NUM_TESTED_DATES)
 
     def test_number_of_hours(self):
         """Checks if the number of the hours we collected is true"""
-        texts_num_hours = sum([len(texts_data.data_dic[date]) for date in texts_data.data_dic])
-        test_num_hours = count_num_hours(texts_dir)
+        texts_num_hours = sum([len(self.texts_data.data_dic[date]) for date in self.texts_data.data_dic])
+        test_num_hours = count_num_hours(self.texts_dir)
 
         self.assertEqual(texts_num_hours, test_num_hours)
 
     def test_data_collected_well(self):
         """Checks if the num_out_texts and the num_in_texts collected well"""
-        texts_num_out_texts = count_num_data(texts_data, OUT)
-        test_num_out_texts = count_num_strings_in_file(combined_file, 'sent SMS', 'sent vs received')
+        texts_num_out_texts = count_num_data(self.texts_data, OUT)
+        test_num_out_texts = count_num_strings_in_file(self.combined_file, 'sent SMS', 'sent vs received')
 
-        texts_num_in_texts = count_num_data(texts_data, IN)
-        test_num_in_texts = count_num_strings_in_file(combined_file, 'received SMS', 'sent vs received')
+        texts_num_in_texts = count_num_data(self.texts_data, IN)
+        test_num_in_texts = count_num_strings_in_file(self.combined_file, 'received SMS', 'sent vs received')
 
         self.assertEqual(texts_num_out_texts, test_num_out_texts)
         self.assertEqual(texts_num_in_texts, test_num_in_texts)
 
     def test_data_calculated_well(self):
         """Checks if the avg and std of num_out_texts and the num_in_texts calculated well for every day time"""
-        day_times = day_times_3
         # avr_and_sd_list order is: [avg_in_dt1, std_in_dt1, ..., avg_in_dtN, std_in_dtN,
         #                            avg_out_dt1, std_out_dt1, ..., avg_out_dtN, std_out_dtN]
-        titles_list, avr_and_sd_list = texts_data.calc_calculations_on_dic(day_times, num_times=2)
+        titles_list, avr_and_sd_list = self.texts_data.calc_calculations_on_dic(day_times, num_times=2)
 
         texts_avg_and_std_num_in_texts = avr_and_sd_list[:len(avr_and_sd_list)//2]
-        test_avg_and_std_num_in_texts = calc_avg_and_std_on_file(day_times, 'received SMS')
+        test_avg_and_std_num_in_texts = calc_avg_and_std_on_file(day_times, 'received SMS', self.combined_file)
 
         texts_avg_and_std_num_out_texts = avr_and_sd_list[len(avr_and_sd_list)//2:]
-        test_avg_and_std_num_out_texts = calc_avg_and_std_on_file(day_times, 'sent SMS')
+        test_avg_and_std_num_out_texts = calc_avg_and_std_on_file(day_times, 'sent SMS', self.combined_file)
 
         print(np.round(np.array(texts_avg_and_std_num_in_texts), 4))
         print(np.round(np.array(test_avg_and_std_num_in_texts), 4))

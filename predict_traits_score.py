@@ -3,6 +3,7 @@ from questionnaires import traits_names
 from sklearn.externals import joblib
 import pandas as pd
 import os
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, AdaBoostClassifier
 
 
 def predict_traits_on_new_data(data_path):
@@ -28,7 +29,7 @@ def predict_traits_on_new_data(data_path):
 
     for trait in traits_names:
         # Load the model from the file
-        trait_model_from_joblib = joblib.load(f'{trait}_model.pkl')
+        trait_model_from_joblib = joblib.load(os.path.join('traits_models', f'{trait}_model.pkl'))
 
         cols_list = trait_cols_names_info[trait]
         cur_trait_df = machine_learning_df[cols_list]

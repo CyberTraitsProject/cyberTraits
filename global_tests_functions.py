@@ -4,6 +4,7 @@ import numpy as np
 from collections import Counter
 import math
 from math import pow
+from date_time import *
 
 
 def count_num_dates(sensor_dir):
@@ -85,11 +86,19 @@ def round_list(list_of_lists):
     return n_list_of_lists
 
 
+def add_zeros_to_list(sensor_data_list):
+    while len(sensor_data_list) != NUM_TESTED_DATES:
+        sensor_data_list.append(0)
+    return sensor_data_list
+
+
 def do_avg_on_list(sensor_data_list):
+    sensor_data_list = add_zeros_to_list(sensor_data_list)
     return np.average(np.array(sensor_data_list))
 
 
 def do_std_on_list(sensor_data_list):
+    sensor_data_list = add_zeros_to_list(sensor_data_list)
     return np.std(np.array(sensor_data_list))
 
 
@@ -144,3 +153,6 @@ def convert_nan_to_0(np_arr):
         if np.isnan(value):
             np_arr[i] = 0
     return np_arr
+
+
+sensor_candidate_dir = ''

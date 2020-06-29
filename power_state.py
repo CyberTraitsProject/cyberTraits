@@ -231,7 +231,7 @@ def power_state_main(power_state_dir):
     # send the data to the calculation function, and return the calculated data + its titles
     # num_times=2, because the data contains two inputs that we need to calculate
     # avg, std on them - num on power state and sum on power state
-    return power_state_data.calc_calculations_on_dic(day_times_3, num_times=2)
+    return power_state_data.calc_calculations_on_dic(day_times, num_times=2)
 
 
 if __name__ == '__main__':

@@ -44,7 +44,7 @@ def check_model(file, X_train, X_test, y_train, y_test, model, trait_name, class
     # fit the model on the train data
     model.fit(X_train, y_train)
     # Save the model as a pickle in a file
-    joblib.dump(model, f'{trait_name}_model.pkl')
+    joblib.dump(model, os.path.join('traits_models', f'{trait_name}_model.pkl'))
     # predict the test data
     y_pred = model.predict(X_test)
     if classifier:
