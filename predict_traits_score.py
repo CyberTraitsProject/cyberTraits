@@ -10,14 +10,18 @@ def predict_traits_on_new_data(data_path):
     # {col_name1: {mean: mean1, scale: scale1},
     #  col_name2: {mean: mean2, scale: scale2}, ...
     #  col_nameN: {mean: meanN, scale: scaleN}}
-    mean_scale_info_file = "mean_scale_info.pkl"
-    mean_scale_info = pickle.load(open(mean_scale_info_file, 'rb'))
+    mean_scale_info_file_path = "mean_scale_info.pkl"
+    mean_scale_info_file = open(mean_scale_info_file_path, 'rb')
+    mean_scale_info = pickle.load(mean_scale_info_file)
+    mean_scale_info_file.close()
 
     # {trait_name1: [col_name1, col_name2, ... , col_nameN1],
     #  trait_name2: [col_name1, col_name2, ... , col_nameN2], ...,
     #  trait_nameM: [col_name1, col_name2, ... , col_nameNM]}
-    trait_cols_names_info_file = "trait_cols_names_info.pkl"
-    trait_cols_names_info = pickle.load(open(trait_cols_names_info_file, 'rb'))
+    trait_cols_names_info_file_path = "trait_cols_names_info.pkl"
+    trait_cols_names_info_file = open(trait_cols_names_info_file_path, 'rb')
+    trait_cols_names_info = pickle.load(trait_cols_names_info_file)
+    trait_cols_names_info_file.close()
 
     # open the machine learning file
     machine_learning_file = "machine_learning_data.csv"

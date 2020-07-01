@@ -41,7 +41,9 @@ def questionnaires_main(questionnaires_dir):
             questionnaires_info[candidate_id][trait] = traits_data_lists[j][i]
 
     # save the questionnaires info in a pickle file
-    pickle.dump(questionnaires_info, open('questionnaires_info.pkl', 'wb'))
+    questionnaires_info_file = open('questionnaires_info.pkl', 'wb')
+    pickle.dump(questionnaires_info, questionnaires_info_file)
+    questionnaires_info_file.close()
 
 
 if __name__ == '__main__':

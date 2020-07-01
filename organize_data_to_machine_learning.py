@@ -34,7 +34,9 @@ def scaling_data(machine_learning_df):
     for i, col_name in enumerate(col_names):
         mean_scale_dic[col_name] = {'mean': mean_list[i], 'scale': scale_list[i]}
     # save the questionnaires info in a pickle file
-    pickle.dump(mean_scale_dic, open('mean_scale_info.pkl', 'wb'))
+    mean_scale_info_file = open('mean_scale_info.pkl', 'wb')
+    pickle.dump(mean_scale_dic, mean_scale_info_file)
+    mean_scale_info_file.close()
 
     # insert the scaled value to the data frame
     scaled_features[col_names] = features
@@ -133,9 +135,11 @@ def get_candidates_list():
     """
 
     # load the candidates list
-    candidates_list_file = 'candidates_list.pkl'
-    check_if_file_exists(candidates_list_file)
-    candidates_dic = pickle.load(open(candidates_list_file, 'rb'))
+    candidates_list_file_path = 'candidates_list.pkl'
+    check_if_file_exists(candidates_list_file_path)
+    candidates_list_file = open(candidates_list_file_path, 'rb')
+    candidates_dic = pickle.load(candidates_list_file)
+    candidates_list_file.close()
 
     # collect all the candidates id that have app data and questionnaires data
     candidates_list = [candidate_id for candidate_id in candidates_dic if candidates_dic[candidate_id]]
@@ -156,20 +160,22 @@ def organize_data_to_machine_learning_main():
     candidates_list = get_candidates_list()
 
     # load the questionnaires data
-    questionnaires_info_file = 'questionnaires_info.pkl'
-    check_if_file_exists(questionnaires_info_file)
-    questionnaires_info = pickle.load(open(questionnaires_info_file, 'rb'))
+    questionnaires_info_file_path = 'questionnaires_info.pkl'
+    check_if_file_exists(questionnaires_info_file_path)
+    questionnaires_info_file = open(questionnaires_info_file_path, 'rb')
+    questionnaires_info = pickle.load(questionnaires_info_file)
+    questionnaires_info_file.close()
 
     # open the machine learning file
     machine_learning_file = "machine_learning_data_day_times_3.csv"
     check_if_file_exists(machine_learning_file)
     machine_learning_df = pd.read_csv(machine_learning_file)
 
-    # scale the data - every cell will be (cell_value - cell_cols_mean) / cell_cols_std
-    machine_learning_df = scaling_data(machine_learning_df)
-
     # feature selection - method #1
     machine_learning_df = feature_selection_by_variance_threshold(machine_learning_df)
+
+    # scale the data - every cell will be (cell_value - cell_cols_mean) / cell_cols_std
+    machine_learning_df = scaling_data(machine_learning_df)
 
     # create to every trait, a machine learning file that contains to every candidate he's score to this trait
     create_machine_learning_file_to_every_trait(machine_learning_df, candidates_list, questionnaires_info)

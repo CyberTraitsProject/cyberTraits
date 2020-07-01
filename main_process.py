@@ -42,9 +42,11 @@ def create_csv_for_machine_learning(data_path, is_research=True):
 	if is_research:
 		# run the questionnaires code and read the questionnaires data it created
 		questionnaires_main(os.path.join(data_path, "questionnaires"))
-		questionnaires_info_file = 'questionnaires_info.pkl'
-		check_if_file_exists(questionnaires_info_file)
-		questionnaires_info = pickle.load(open(questionnaires_info_file, 'rb'))
+		questionnaires_info_file_path = 'questionnaires_info.pkl'
+		check_if_file_exists(questionnaires_info_file_path)
+		questionnaires_info_file = open(questionnaires_info_file_path, 'rb')
+		questionnaires_info = pickle.load(questionnaires_info_file)
+		questionnaires_info_file.close()
 
 	# data_fields_list_for_machine_learning - will contain the titles of the data of the machine learning
 	# the first title - candidate_id
@@ -124,7 +126,9 @@ def create_csv_for_machine_learning(data_path, is_research=True):
 	np.savetxt(machine_learning_data_file, np_data_for_csv_file, delimiter=',', fmt='%s')
 
 	# save the list of the candidates in pickle file
-	pickle.dump(candidates_dic, open('candidates_list.pkl', 'wb'))
+	candidates_list_file = open('candidates_list.pkl', 'wb')
+	pickle.dump(candidates_dic, candidates_list_file)
+	candidates_list_file.close()
 
 
 if __name__ == "__main__":

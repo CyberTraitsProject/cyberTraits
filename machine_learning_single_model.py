@@ -10,22 +10,20 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.gaussian_process import GaussianProcessClassifier, GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-from sklearn.neural_network import MLPClassifier, MLPRegressor
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from useful_functions import *
 import itertools
 from sklearn.metrics import confusion_matrix, mean_squared_error
-# from xgboost import XGBClassifier
 import joblib
 
 
-classifier_model = AdaBoostClassifier()
-classifier_model_n = 'AdaBoostClassifier()'
-regression_model = RANSACRegressor(random_state=42, min_samples=3)
-regression_model_n = 'RANSACRegressor(random_state=42, min_samples=3)'
+classifier_model = DecisionTreeClassifier(max_depth=3)
+classifier_model_n = 'DecisionTreeClassifier(max_depth=3)'
+regression_model = DecisionTreeRegressor(max_depth=3)
+regression_model_n = 'DecisionTreeRegressor(max_depth=3)'
 
-trait_bets_columns_dic = {}
+trait_best_columns_dic = {}
 
 
 def check_model(X_train, X_test, y_train, y_test, model):
@@ -47,7 +45,7 @@ def check_model(X_train, X_test, y_train, y_test, model):
     return test_score, train_score, model
 
 
-def run_ml_model_on_every_combination(file, X_train, X_test, y_train, y_test, trait_name, classifier):
+def run_greedy_algorithm_and_choose_the_best_model(file, X_train, X_test, y_train, y_test, trait_name, classifier):
     """
     create all the combination of taking 3 columns from all the columns.
     on every set, takes only these columns and run all of the machine learning models on it.
@@ -120,14 +118,17 @@ def run_ml_model_on_every_combination(file, X_train, X_test, y_train, y_test, tr
             columns_scores_models_dic[best_score]['columns_names'] = columns_best_names
             columns_scores_models_dic[best_score]['model'] = model
 
-        file.write('columns indexes: ' + str(columns_best_indexes) + '\n')
-        file.write('columns names: ' + str(columns_best_names) + '\n')
-        file.write('test score:' + str(best_score) + '\n')
-        file.write('train score:' + str(best_train_score) + '\n\n')
+        if file:
+            file.write('columns indexes: ' + str(columns_best_indexes) + '\n')
+            file.write('columns names: ' + str(columns_best_names) + '\n')
+            file.write('test score:' + str(best_score) + '\n')
+            file.write('train score:' + str(best_train_score) + '\n\n')
 
     best_final_score = max(columns_scores_models_dic)
 
     columns_best_final_names = columns_scores_models_dic[best_final_score]['columns_names']
+    if not os.path.isdir('traits_models'):
+        os.makedirs('traits_models')
     # Save the model as a pickle in a file
     joblib.dump(model, os.path.join('traits_models', f'{trait_name}_model.pkl'))
 
@@ -163,8 +164,11 @@ def machine_learning_model_main(file, machine_learning_data_path, trait_name, cl
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42, shuffle=True)
 
-    columns_best_names = run_ml_model_on_every_combination(file, X_train, X_test, y_train, y_test, trait_name, classifier)
-    trait_bets_columns_dic[trait_name] = columns_best_names
+    columns_best_names = run_greedy_algorithm_and_choose_the_best_model(file, X_train, X_test, y_train, y_test,
+                                                                        trait_name, classifier)
+    trait_best_columns_dic[trait_name] = columns_best_names
+
+    return columns_best_names
 
 
 if __name__ == '__main__':
@@ -180,6 +184,8 @@ if __name__ == '__main__':
         if trait == 'Style':
             machine_learning_model_main(file, machine_learning_trait_file, trait, classifier=True)
         else:
-            machine_learning_model_main(file, machine_learning_trait_file, trait)
+            print(machine_learning_model_main(file, machine_learning_trait_file, trait))
     file.close()
-    pickle.dump(trait_bets_columns_dic, open('trait_cols_names_info.pkl', 'wb'))
+    trait_cols_names_info_file = open('trait_cols_names_info.pkl', 'wb')
+    pickle.dump(trait_best_columns_dic, trait_cols_names_info_file)
+    trait_cols_names_info_file.close()
