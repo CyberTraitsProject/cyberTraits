@@ -1,5 +1,4 @@
 import pickle
-
 import pandas as pd
 from sklearn.linear_model import LinearRegression, RANSACRegressor
 from sklearn.svm import SVC
@@ -45,7 +44,7 @@ def check_model(X_train, X_test, y_train, y_test, model):
     return test_score, train_score, model
 
 
-def run_greedy_algorithm_and_choose_the_best_model(file, X_train, X_test, y_train, y_test, trait_name, classifier):
+def run_greedy_algorithm_and_choose_the_best_model(results_dir, file, X_train, X_test, y_train, y_test, trait_name, classifier):
     """
     create all the combination of taking 3 columns from all the columns.
     on every set, takes only these columns and run all of the machine learning models on it.
@@ -127,15 +126,17 @@ def run_greedy_algorithm_and_choose_the_best_model(file, X_train, X_test, y_trai
     best_final_score = max(columns_scores_models_dic)
 
     columns_best_final_names = columns_scores_models_dic[best_final_score]['columns_names']
-    if not os.path.isdir('traits_models'):
-        os.makedirs('traits_models')
-    # Save the model as a pickle in a file
-    joblib.dump(model, os.path.join('traits_models', f'{trait_name}_model.pkl'))
+    trait_models_dir = os.path.join(results_dir, 'traits_models')
+    if not os.path.isdir(trait_models_dir):
+        os.makedirs(trait_models_dir)
+    # Save the best model in a pickle file (by joblib)
+    best_model = columns_scores_models_dic[best_final_score]['model']
+    joblib.dump(best_model, os.path.join(trait_models_dir, f'{trait_name}_model.pkl'))
 
     return list(columns_best_final_names)
 
 
-def machine_learning_model_main(file, machine_learning_data_path, trait_name, classifier=False):
+def machine_learning_model_main(results_dir, file, machine_learning_data_path, trait_name, classifier=False):
     """
     this method is doing the machine learning itself.
     the machine learning will be supervised, because the y values are known.
@@ -164,7 +165,7 @@ def machine_learning_model_main(file, machine_learning_data_path, trait_name, cl
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42, shuffle=True)
 
-    columns_best_names = run_greedy_algorithm_and_choose_the_best_model(file, X_train, X_test, y_train, y_test,
+    columns_best_names = run_greedy_algorithm_and_choose_the_best_model(results_dir, file, X_train, X_test, y_train, y_test,
                                                                         trait_name, classifier)
     trait_best_columns_dic[trait_name] = columns_best_names
 
@@ -173,19 +174,29 @@ def machine_learning_model_main(file, machine_learning_data_path, trait_name, cl
 
 if __name__ == '__main__':
 
-    file = open('model_results.txt', 'w')
+    results_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\summary all models results\aaa'
+    if not os.path.isdir(results_dir):
+        os.makedirs(results_dir)
+
+    description_file = os.path.join(results_dir, 'model_description.txt')
+    if not os.path.isfile(description_file):
+        open(description_file, 'w').close()
+
+    file = open(os.path.join(results_dir, 'model_results.txt'), 'w')
     file.write('The Classifier Model : ' + classifier_model_n + '\n')
     file.write('The Regression Model : ' + regression_model_n + '\n')
+
+    scaled_data_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\day_times_1'
 
     # run the models on all of the traits, for the trait 'Style' - run a classifier model
     for trait in traits_names:
         file.write(str(trait) + ':\n')
-        machine_learning_trait_file = f'machine_learning_data_{trait}.csv'
+        machine_learning_trait_file = os.path.join(scaled_data_dir, f'machine_learning_data_{trait}.csv')
         if trait == 'Style':
-            machine_learning_model_main(file, machine_learning_trait_file, trait, classifier=True)
+            machine_learning_model_main(results_dir, file, machine_learning_trait_file, trait, classifier=True)
         else:
-            print(machine_learning_model_main(file, machine_learning_trait_file, trait))
+            print(machine_learning_model_main(results_dir, file, machine_learning_trait_file, trait))
     file.close()
-    trait_cols_names_info_file = open('trait_cols_names_info.pkl', 'wb')
+    trait_cols_names_info_file = open(os.path.join(results_dir, 'trait_cols_names_info.pkl'), 'wb')
     pickle.dump(trait_best_columns_dic, trait_cols_names_info_file)
     trait_cols_names_info_file.close()
