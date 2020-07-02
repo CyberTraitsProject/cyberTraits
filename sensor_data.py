@@ -124,10 +124,10 @@ class Sensor_Data():
            d. the number of the out calls with duration 0.
            e. the median of the duration time in this part of day (for every date).
            f. the S value on the phones numbers durations time.
-        2. do avg and std on a, b, on every day time.
+        2. do avg, std, common and median on a, b, on every day time.
         3. do avg of on c, d, e, f, on every day time.
         4. do avg on the percent of the out calls, on every day time.
-        ---> number of columns : num_day_times * (2 + 2 + 1 + 1 + 1 + 1 + 1) = num_day_times * 9
+        ---> number of columns : num_day_times * (4 + 4 + 1 + 1 + 1 + 1 + 1) = num_day_times * 9
 
         for power state:
         1. for every day time, pass on every hour in it, and collect:

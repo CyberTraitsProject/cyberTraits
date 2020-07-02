@@ -187,8 +187,8 @@ class MachineLearningTests(unittest.TestCase):
         self.origin_file = r'C:\Users\onaki\CyberTraits\cyberTraits\final\day_times_3\machine_learning_data_day_times_3.csv'
         self.scaled_info_file = r'C:\Users\onaki\CyberTraits\cyberTraits\final\day_times_3\mean_scale_info.pkl'
         self.questionnaires_file = r'C:\Users\onaki\CyberTraits\cyberTraits\questionnaires\questionnaires_data.csv'
-        self.model_results_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\summary all models results\all_models\decision_tree_md_3_dt_1'
-        self.ml_data_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\day_times_1'
+        self.model_results_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\summary all models results\final_models'
+        self.ml_data_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\day_times_3'
 
     def test_scaling_data(self):
         """Checks if mean and the scale values for every columns saved well"""
@@ -217,7 +217,11 @@ class MachineLearningTests(unittest.TestCase):
 
             # check the number of the columns in the ml model is equal to the number of the cols
             trait_model = get_ml_model(self.model_results_dir, trait)
-            self.assertEqual(len(test_trait_cols_list), trait_model.n_features_)
+            try:
+                self.assertEqual(len(test_trait_cols_list), trait_model.n_features_)
+            except:
+                # linear regression doesnt have the attribute n_features_. it has rank_ instead.
+                self.assertEqual(len(test_trait_cols_list), trait_model.rank_)
 
             # check that the scores on the test and the train data are the same
             test_test_score, test_train_score = calc_train_test_scores_of_model(self.ml_data_dir, trait_model,
