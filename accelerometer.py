@@ -43,35 +43,7 @@ def organize_data(path_dir, accelerometer_file, accelerometer_data):
             # update the last minute and second that we added its x,y,z values
             p_min = c_min
             p_sec = c_sec
-    '''
-    # the index of the line we need to take the data from
-    #curr_line_index = 0
-    
-    # pass on 60 minutes
-    for i in range(60):
 
-        # pass on 60 seconds in a minute
-        for j in range(60):
-
-            # the curr time is more or little than the wanted time, or we finished all the lines in the file -->
-            # there is a need to fulfill the values with 0,0,0 (it will calculate in the functions - MAD function &
-            # calculate_average - we divide there by 60*60)
-            #if (curr_date_time.minute != i or curr_date_time.second != j) or curr_line_index + 1 == len(UTC_times_list):
-                #continue
-            if curr_line_index == len(UTC_times_list):
-                break
-            if curr_date_time.minute != i or curr_date_time.second != j:
-                continue
-            else:
-                # add the x, y, z values to the x_y_z_list
-                x_y_z_list_for_hour.append([x_list[curr_line_index], y_list[curr_line_index], z_list[curr_line_index]])
-
-                # while the next line is on the same minute and second, and we don't reach EOF,
-                # we continue to the next line
-                while curr_date_time.minute == i and curr_date_time.second <= j and curr_line_index + 1 != len(UTC_times_list):
-                    curr_line_index += 1
-                    curr_date_time = get_date_time_from_UTC_time(UTC_times_list[curr_line_index])
-    '''
     # get the date and the hour
     date = get_date_from_file_name(accelerometer_file)
     hour = get_hour_from_file_name(accelerometer_file)

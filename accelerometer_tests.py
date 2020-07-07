@@ -49,6 +49,11 @@ def collect_xyz_from_file(combined_file):
 
 
 def calc_avg_and_std_on_file(day_times, combined_file):
+    """
+    :param day_times: the day times to do the calculations on it
+    :param combined_file: the file with all of the data
+    :return: the analyzed data in a list
+    """
     accelerometer_df = pd.read_csv(combined_file, usecols=['UTC time', 'x', 'y', 'z'])
     UTC_time_list = accelerometer_df['UTC time']
     x_list = accelerometer_df['x']
@@ -112,6 +117,9 @@ def accelerometer_organize_all_data(accelerometer_dir):
 class AccelerometerTests(unittest.TestCase):
 
     def setUp(self):
+        """
+        kind of initialization function. run before every test/tests runs
+        """
         # the path to the accelerometer data directory
         self.accelerometer_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data_edited\2pe2t6si\accelerometer'
         # the collected data, just like the code do it

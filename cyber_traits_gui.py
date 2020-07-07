@@ -37,6 +37,9 @@ def darw_bar():
 
 
 def folder_path_clicked():
+    """
+    handle the button "enter path"
+    """
     global data_folder
     data_folder = path_txt.get()
     predicted_done_lbl.grid_forget()
@@ -50,6 +53,9 @@ def folder_path_clicked():
 
 
 def organize_predict_clicked():
+    """
+    handle the button "organize and predict data"
+    """
     wait_lbl.grid(column=2, row=2)
     progress.grid(column=1, row=2)
     data_folder_n = os.path.normpath(data_folder)
@@ -70,10 +76,15 @@ def organize_predict_clicked():
 
 
 def predict_traits():
+    """
+    predict the traits values of the requested candidates
+    :return: the path to the predicted results
+    """
+    final_ml_data_path = r'C:\Users\onaki\CyberTraits\cyberTraits\final\final_models'
     # {{trait1: [y predicted lists for all the candidates],
     #   trait2: [y predicted lists for all the candidates], ... ,
     #   traitN: [y predicted lists for all the candidates]}
-    candidates_list, predicted_values_dic = predict_traits_on_new_data(data_folder)
+    candidates_list, predicted_values_dic = predict_traits_on_new_data(final_ml_data_path)
 
     # print the results of the prediction
     predicted_traits_file = 'predicted_traits.csv'

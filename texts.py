@@ -46,8 +46,6 @@ def texts_main(texts_dir):
     :return: the calculated data in 2 lists - the calculated data and its titles
     """
 
-    #texts_data = organize_all_sensor_data(texts_dir, 'texts')
-
     check_if_dir_exists(texts_dir)
 
     texts_data = Sensor_Data('texts')

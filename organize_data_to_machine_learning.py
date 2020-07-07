@@ -1,7 +1,6 @@
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import VarianceThreshold
-from sklearn.feature_selection import SelectKBest, GenericUnivariateSelect, f_regression, mutual_info_regression
-#, SelectPercentile, SelectFpr, SelectFdr, SelectFwe, f_classif, chi2
+from sklearn.feature_selection import SelectKBest, GenericUnivariateSelect
 import numpy as np
 import pickle
 from questionnaires import traits_names

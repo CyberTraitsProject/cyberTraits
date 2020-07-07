@@ -83,7 +83,7 @@ class Sensor_Data():
         self.data_dic = {}
 
     def calc_calculations_on_dic(self, day_times, num_times=1,
-                               calc_avg=True, calc_std=True, calc_median=False, calc_common=False):
+                                 calc_avg=True, calc_std=True, calc_median=False, calc_common=False):
         """
         this method pass on the data in the data_dic, collect it to day times data,
         and do calculations on every day time data.
@@ -293,7 +293,7 @@ class Sensor_Data():
         return titles_list, avr_and_sd_list
 
     def calc_calculations_on_list(self, day_times, day_times_data, run, num_times,
-                                calc_avg, calc_std, calc_median, calc_common):
+                                  calc_avg, calc_std, calc_median, calc_common):
         """
         :param day_times: the day times structure
         :param day_times_data: the data lists for every day time

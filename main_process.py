@@ -18,8 +18,8 @@ def global_main(app_data_dir, candidate_dir_name, sensor):
 	:param app_data_dir: the path the the app directory data
 	:param candidate_dir_name: the path to the candidate directory data
 	:param sensor: the sensor name we want to run on it
-	:return: the returned data of the function its called to
-			 in error state - returns 2 empty lists
+	:return: the returned data of the function its called to,
+	in error state - returns 2 empty lists
 	"""
 	try:
 		func_name = sensor + "_main"
@@ -94,11 +94,11 @@ def create_csv_for_machine_learning(data_path, is_research=True):
 		# run on every sensor, and send to its main.
 		# get two lists - sensor_titles_list:
 		# the titles of the returned data,
-		# analayzed_data_list: the anaylazed data itself
+		# analyzed_data_list: the analyzed data itself
 		for sensor in sensors_names:
-			sensor_titles_list, analayzed_data_list = global_main(app_data_dir, candidate_dir_name, sensor)
-			# add the candidate's anaylazed data, to all of the candidates data
-			curr_data_list_for_machine_learning += analayzed_data_list
+			sensor_titles_list, analyzed_data_list = global_main(app_data_dir, candidate_dir_name, sensor)
+			# add the candidate's analyzed data, to all of the candidates data
+			curr_data_list_for_machine_learning += analyzed_data_list
 			# if it is the first candidates - add the sensor titles to the titles list
 			if first_candidate:
 				data_fields_list_for_machine_learning += sensor_titles_list

@@ -87,44 +87,81 @@ def round_list(list_of_lists):
 
 
 def add_zeros_to_list(sensor_data_list):
+    """
+    if the list length is not NUM_TESTED_DATES, add for it (NUM_TESTED_DATES - _list_len) zero's,
+    for doing the avg and the std correctly (because we are testing 7 days for every candidate).
+    :param sensor_data_list: the list
+    :return: the list, with the added zero's data
+    """
     while len(sensor_data_list) != NUM_TESTED_DATES:
         sensor_data_list.append(0)
     return sensor_data_list
 
 
 def do_avg_on_list(sensor_data_list):
+    """
+    :param sensor_data_list: the data list
+    :return: the average on the list
+    """
     sensor_data_list = add_zeros_to_list(sensor_data_list)
     return np.average(np.array(sensor_data_list))
 
 
 def do_std_on_list(sensor_data_list):
+    """
+    :param sensor_data_list: the data list
+    :return: the standard division on the list
+    """
     sensor_data_list = add_zeros_to_list(sensor_data_list)
     return np.std(np.array(sensor_data_list))
 
 
 def do_median_on_list(sensor_data_list):
+    """
+    :param sensor_data_list: the data list
+    :return: the median of the list, if empty list -> return 0
+    """
     if not len(sensor_data_list):
         return 0
     return np.median(np.array(sensor_data_list))
 
 
 def do_common_on_list(sensor_data_list):
-    return np.bincount(np.array(sensor_data_list)).argmax()#Counter(sensor_data_list).most_common(1)[0][0]
+    """
+    :param sensor_data_list: the data list
+    :return: the common of the list, if empty list -> return 0
+    """
+    return np.bincount(np.array(sensor_data_list)).argmax()
 
 
 def get_day_time_index(cur_hour, day_times):
+    """
+    :param cur_hour: the hour
+    :param day_times: the day times
+    :return: the index of the day time the cur_hour found there
+    """
     for i, c_day_time in enumerate(day_times):
         if int(cur_hour) in day_times[c_day_time]:
             return i
 
 
 def get_key_from_hour(hour, day_times):
+    """
+    :param hour: the hour
+    :param day_times: the day times
+    :return: the name of the day time the hour found in it
+    """
     for key, hours_list in day_times.items():
         if hour in hours_list:
             return key
 
 
 def do_S_on_dic(phones_durations_dic, num_hours_in_dt):
+    """
+    :param phones_durations_dic: the phones numbers durations dicionary
+    :param num_hours_in_dt: num hours in the day time
+    :return: the calculation of S
+    """
     sum_time_in_sec = num_hours_in_dt * 60 * 60 # =T
     # calculate the Fi list
     Fi_list = []
@@ -137,6 +174,11 @@ def do_S_on_dic(phones_durations_dic, num_hours_in_dt):
 
 
 def do_MAD_on_xyz_lists(xyz_lists, num_hours_in_dt):
+    """
+    :param xyz_lists: list of xyz lists
+    :param num_hours_in_dt: how much hours in the day time
+    :return: the calculation of MAD
+    """
     ri_list = []
     for xyz in xyz_lists:
         ri_list.append(pow(pow(xyz[0], 2) + pow(xyz[1], 2) + pow(xyz[2], 2), -2))
@@ -149,10 +191,11 @@ def do_MAD_on_xyz_lists(xyz_lists, num_hours_in_dt):
 
 
 def convert_nan_to_0(np_arr):
+    """
+    :param np_arr: a np array
+    :return: the array with zeros values where were nan values
+    """
     for i, value in enumerate(np_arr):
         if np.isnan(value):
             np_arr[i] = 0
     return np_arr
-
-
-sensor_candidate_dir = ''

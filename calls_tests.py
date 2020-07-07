@@ -62,6 +62,11 @@ def sum_durations_for_contacts(calls_data):
 
 
 def do_calculations_on_file(day_times, combined_file):
+    """
+    :param day_times: the day times to do the calculations on it
+    :param combined_file: the file with all of the data
+    :return: the analyzed data in a list
+    """
     calls_df = pd.read_csv(combined_file, usecols=['UTC time', 'hashed phone number', 'call type', 'duration in seconds'])
     UTC_time_list = calls_df['UTC time']
     phones_list = calls_df['hashed phone number']
@@ -176,6 +181,9 @@ def calls_organize_all_data(calls_dir):
 class CallsTests(unittest.TestCase):
 
     def setUp(self):
+        """
+        kind of initialization function. run before every test/tests runs
+        """
         # the path to the accelerometer data directory
         self.calls_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data_edited\2pe2t6si\calls'
         # the collected data, just like the code do it

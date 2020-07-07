@@ -51,7 +51,7 @@ POWER_UNSAVED = "Power Save Mode change signal received; device not in power sav
 IDLE = "Device Idle (Doze) state change signal received; device in idle state."
 NOT_IDLE = "Device Idle (Doze) state change signal received; device not in idle state."
 
-day_times = day_times_1
+day_times = day_times_3
 
 NUM_TESTED_DATES = 7
 

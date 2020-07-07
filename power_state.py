@@ -15,6 +15,7 @@ MAX_ON_TIME = 3
 
 OFF_LIST = [OFF, SHUTDOWN]
 
+
 def get_list_of_power_on_durations(on_time, off_time):
     """
     calculate the duration time of every hour the phone was on in it.
@@ -26,7 +27,6 @@ def get_list_of_power_on_durations(on_time, off_time):
              it will return list with one value.
     """
 
-    # TODO - to decide how much time called not real
     # if the duration time is 3 hours or more -->
     # that says there is a bug in the data -->
     # we will send an array with single value 0
@@ -154,30 +154,9 @@ def organize_data(path_dir, power_state_file, power_state_data, last_on_power_st
             # we handle the last power state --> None
             last_on_power_state_date = None
 
-        # the current event is not on or off, and there was on event in the last time, calculated as duration 0
-            '''elif last_on_power_state_date:
-                # TODO - to wait to the next off
-                on_time = last_on_power_state_date
-                off_time = on_time
-                # we handle the last power state --> None
-                last_on_power_state_date = None'''
-
         # the current power state is on
         elif power_state == ON:
             last_on_power_state_date = get_date_time_from_UTC_time(UTC_times_list[i])
-            # we didnt reach EOF and the next event is off
-            '''if i + 1 < len(power_states_list) and power_states_list[i + 1] == OFF:
-                off_time = get_date_time_from_UTC_time(UTC_times_list[i + 1])
-            # we reached to EOF
-            elif i + 1 == len(power_states_list):
-                last_on_power_state_date = UTC_times_list[i]
-                # return the last on event
-                # i.e. - the file finished with on event, so we need to check the next file,
-                # when the off event happened.
-                return get_date_time_from_UTC_time(last_on_power_state_date)
-            # we didnt reach EOF and the next event is not off - calculate it as duration 0
-            else:
-                off_time = on_time'''
             continue
 
         # another power states never mind
@@ -235,6 +214,4 @@ def power_state_main(power_state_dir):
 
 
 if __name__ == '__main__':
-    #fold = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data'
-    #for folder in os.listdir(fold):
     power_state_main(r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data\ygpxrisr\power_state')

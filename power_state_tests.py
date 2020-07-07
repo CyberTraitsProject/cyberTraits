@@ -88,6 +88,14 @@ def sum_and_list_on_screen_events_in_file(combined_file):
 
 
 def update_data_on_date(on_time, off_time, day_times, counter_data_for_cur_date):
+    """
+    pass on every day time, and add it the time the screen was on
+    :param on_time: the on screen time
+    :param off_time: the off screen time
+    :param day_times: the day times
+    :param counter_data_for_cur_date: the counter data of the current date
+    :return: the updated counter_data_for_cur_date
+    """
     # the same date but not the same day time
     on_day_time_index = get_day_time_index(on_time.hour, day_times)
     off_day_time_index = get_day_time_index(off_time.hour, day_times)
@@ -106,6 +114,15 @@ def update_data_on_date(on_time, off_time, day_times, counter_data_for_cur_date)
 
 
 def update_data(on_time, off_time, day_times, counter_data_for_cur_date, data_list_for_all_day_times):
+    """
+    pass on every day time in every date between on_time to off_time, and add it the time the screen was on.
+    :param on_time: the on screen time
+    :param off_time: the off screen time
+    :param day_times: the day times
+    :param counter_data_for_cur_date: the counter data of the current date
+    :param data_list_for_all_day_times: the counter data of all of the dates
+    :return: the updated counter_data_for_cur_date, data_list_for_all_day_times
+    """
     on_date = on_time.date()
     off_date = off_time.date()
     if on_date == off_date:
@@ -127,6 +144,11 @@ def update_data(on_time, off_time, day_times, counter_data_for_cur_date, data_li
 
 
 def calc_avg_and_std_on_file(day_times, combined_file):
+    """
+    :param day_times: the day times to do the calculations on it
+    :param combined_file: the file with all of the data
+    :return: the analyzed data in a list
+    """
     power_state_df = pd.read_csv(combined_file, usecols=['UTC time', 'event'])
     UTC_time_list = power_state_df['UTC time']
     event_type_list = power_state_df['event']
@@ -284,6 +306,9 @@ def power_state_organize_all_data(power_state_dir):
 class PowerStateTests(unittest.TestCase):
 
     def setUp(self):
+        """
+        kind of initialization function. run before every test/tests runs
+        """
         # the path to the accelerometer data directory
         self.power_state_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data_edited\ygpxrisr\power_state'
         # the collected data, just like the code do it

@@ -7,6 +7,12 @@ IN = 0
 
 
 def calc_avg_and_std_on_file(day_time, col_type, combined_file):
+    """
+    :param day_time: the day times to do the calculations on it
+    :param col_type: the type of the col we wants to do calculations on it
+    :param combined_file: the file with all of the data
+    :return: the analyzed data in a list
+    """
     texts_df = pd.read_csv(combined_file, usecols=['UTC time', 'sent vs received'])
     UTC_time_list = texts_df['UTC time']
     text_type_list = texts_df['sent vs received']
@@ -58,6 +64,9 @@ def texts_organize_all_data(texts_dir):
 class TextsTests(unittest.TestCase):
 
     def setUp(self):
+        """
+        kind of initialization function. run before every test/tests runs
+        """
         # the path to the accelerometer data directory
         self.texts_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\cyber_traits_data_edited\ygpxrisr\texts'
         # the collected data, just like the code do it
