@@ -19,9 +19,9 @@ def take_best_models():
         all_trait_cols = pickle.load(open(os.path.join(all_models_dirs, model_dir, 'trait_cols_names_info.pkl'), 'rb'))
         for trait, cols in all_trait_cols.items():
             dict[trait][model_dir] = cols
-
+    results_file_path = os.path.join(all_models_dirs, '..\\', 'summary_best_results')
+    os.makedirs(results_file_path)
     for trait, models_cols in dict.items():
-        results_file_path = os.path.join(all_models_dirs, '../')
         file = open(os.path.join(results_file_path, f'{trait}_cols_results.txt'), 'w')
         for model, cols in models_cols.items():
             model_results_file = open(os.path.join(all_models_dirs, model, 'model_results.txt'), 'r')
@@ -47,7 +47,7 @@ def organize_best_to_one_file():
     """
     :return: pass on the best models, and summarize their results into one file.
     """
-    main_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\final_models'
+    main_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\final_models\64'
     final_descriptions = {'Extraversion': '',  # 'description': '',
                         'Agreeableness': '',
                         'Concientiousness': '',
@@ -109,4 +109,4 @@ def copy_best_model_data_to_final_dir(final_dir, best_model_run_dir, trait):
 
 
 if __name__ == '__main__':
-    organize_best_to_one_file()
+    take_best_models()

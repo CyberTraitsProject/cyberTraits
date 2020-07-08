@@ -9,8 +9,8 @@ from useful_functions import *
 import joblib
 import numpy as np
 
-classifier_model_n = 'AdaBoostClassifier()'
-regression_model_n = 'RandomForestRegressor(max_depth=3)'
+classifier_model_n = 'DecisionTreeClassifier(max_depth=5)'
+regression_model_n = 'DecisionTreeRegressor(max_depth=3)'
 
 trait_best_columns_dic = {}
 
@@ -96,11 +96,11 @@ def run_greedy_algorithm_and_choose_the_best_model(results_dir, file, trait_name
 
                 # run the machine learning model on the current data
                 if classifier:
-                    classifier_model = AdaBoostClassifier()
+                    classifier_model = DecisionTreeClassifier(max_depth=5)
                     test_score, train_score, model = check_model(X_curr_train, X_curr_test, y_curr_train, y_curr_test,
                                                                  classifier_model)
                 else:
-                    regression_model = RandomForestRegressor(max_depth=3)
+                    regression_model = DecisionTreeRegressor(max_depth=3)
                     test_score, train_score, model = check_model(X_curr_train, X_curr_test, y_curr_train, y_curr_test,
                                                                  regression_model)
 
@@ -237,7 +237,7 @@ def machine_learning_single_model_main(specific_run=False):
         final_models_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\summary all models results\final_models'
         run_model_on_specific_cols(scaled_data_dir, final_models_dir, model, trait)
     else:
-        results_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\summary all models results\all_models\random_forest_md_3_adaboost_dt_3_try_final'
+        results_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\summary all models results\all_models\decision_tree_md_3_decision_tree_md_5_dt_3_try_final_64'
         if not os.path.isdir(results_dir):
             os.makedirs(results_dir)
 

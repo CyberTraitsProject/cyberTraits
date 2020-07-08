@@ -265,17 +265,16 @@ def predict_traits_on_data(data_path, final_dir):
     :param final_dir: the dir that contains the final results
     :return: the candidates list, and a dictionary that contains the predicted traits for every candidate
     """
-    candidates_list = []
     predicted_traits_results = {}
     machine_learning_file = "machine_learning_data.csv"
     machine_learning_df = pd.read_csv(machine_learning_file)
+    candidates_list = list(machine_learning_df['candidate_id'])
     mean_scale_info = pickle.load(open(os.path.join(final_dir, 'mean_scale_info.pkl'), 'rb'))
     traits_cols_info = pickle.load(open(os.path.join(final_dir, 'traits_cols_names_info.pkl'), 'rb'))
     # pass on every candidate
-    for candidate_dir in os.listdir(data_path):
-        candidates_list.append(candidate_dir)
+    for candidate_id in candidates_list:
         # takes only the candidate data
-        candidate_df = machine_learning_df[machine_learning_df['candidate_id'] == candidate_dir]
+        candidate_df = machine_learning_df[machine_learning_df['candidate_id'] == candidate_id]
         for trait in traits_names:
             cols = traits_cols_info[trait]
             cur_candidate_df = candidate_df[cols]
@@ -300,7 +299,7 @@ class MachineLearningTests(unittest.TestCase):
         self.origin_file = r'C:\Users\onaki\CyberTraits\cyberTraits\final\day_times_3\machine_learning_data_day_times_3.csv'
         self.scaled_info_file = r'C:\Users\onaki\CyberTraits\cyberTraits\final\day_times_3\mean_scale_info.pkl'
         self.questionnaires_file = r'C:\Users\onaki\CyberTraits\cyberTraits\questionnaires\questionnaires_data.csv'
-        self.model_results_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\final_models'
+        self.model_results_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\final_models\64'
         self.ml_data_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\day_times_3'
         self.data_to_predict = r'C:\Users\onaki\CyberTraits\cyberTraits\data'
 
@@ -362,14 +361,14 @@ class MachineLearningTests(unittest.TestCase):
     def test_cyber_traits_gui_predict_correct(self):
         """Checks if the data predicted correctly"""
         create_csv_for_machine_learning(self.data_to_predict, is_research=False)
-        cyber_traits_gui_candidates_list, cyber_traits_gui_predicted_results = predict_traits_on_new_data(
-            self.model_results_dir)
+        cyber_traits_gui_candidates_list, cyber_traits_gui_predicted_results = predict_traits_on_new_data()
         test_candidates_list, test_predicted_results = predict_traits_on_data(self.data_to_predict,
                                                                               self.model_results_dir)
 
         self.assertEqual(list(cyber_traits_gui_candidates_list), test_candidates_list)
         for trait in cyber_traits_gui_predicted_results:
-            self.assertEqual(list(cyber_traits_gui_predicted_results[trait]), test_predicted_results[trait])
+            self.assertEqual(list(np.array(cyber_traits_gui_predicted_results[trait]).round(10)),
+                             list(np.array(test_predicted_results[trait]).round(10)))
 
 
 if __name__ == '__main__':

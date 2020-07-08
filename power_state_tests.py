@@ -6,16 +6,40 @@ ON = "Screen turned on"
 OFF = "Screen turned off"
 
 
+def file_finish_with_on(ps_file):
+    """
+    :param ps_file: the power state file
+    :return: True if the file finished with ON wo OFF after then, and False if not
+    """
+    power_states_df = pd.read_csv(ps_file, usecols=['event'])
+    power_states_list = list(power_states_df['event'])
+    for i in range(len(power_states_list) - 1, -1, -1):
+        if power_states_list[i] == ON:
+            return True
+        if power_states_list[i] == OFF or power_states_list[i] == SHUTDOWN:
+            return False
+
+
 def count_num_empty_files(power_state_dir):
     """
     :return: how many empty files there are. i.e. - how much file not include events of ON or OFF
     """
     count = 0
+    prev_file = None
     for curr_power_state_file in os.listdir(power_state_dir):
         power_states_df = pd.read_csv(os.path.join(power_state_dir, curr_power_state_file), usecols=['event'])
         power_states_list = list(power_states_df['event'])
-        if ON not in power_states_list and OFF not in power_states_list:
-            count += 1
+        # if the file doesnt contain ON dtat
+        if ON not in power_states_list:
+            # if the file also doesnt contain OFF data
+            if OFF not in power_states_list and SHUTDOWN not in power_states_list:
+                count += 1
+            # the file contains OFF data --> check if it OFF after ON or OFF after OFF
+            else:
+                # OFF after OFF -> count it
+                if prev_file and not file_finish_with_on(os.path.join(power_state_dir, prev_file)):
+                    count += 1
+        prev_file = curr_power_state_file
     return count
 
 
@@ -324,7 +348,7 @@ class PowerStateTests(unittest.TestCase):
         self.assertEqual(power_state_num_dates, test_num_dates)
         self.assertEqual(power_state_num_dates, 7)
 
-    '''def test_number_of_hours(self):
+    def test_number_of_hours(self):
         """Checks if the number of the hours we collected is true"""
         power_state_num_hours = count_num_not_full_hours(self.power_state_data)   # without the hours that doesn't have file (i.e. all of this time was on)
         test_num_hours = count_num_hours(self.power_state_dir) - count_num_empty_files(self.power_state_dir)
@@ -332,7 +356,7 @@ class PowerStateTests(unittest.TestCase):
         print('power_state_num_hours:', power_state_num_hours)
         print('test_num_hours:', test_num_hours)
 
-        self.assertEqual(power_state_num_hours, test_num_hours)'''
+        self.assertEqual(power_state_num_hours, test_num_hours)
 
     def test_data_collected_well(self):
         """Checks if the num_on_events and the sum_on_events_durations and the durations list collected well"""
