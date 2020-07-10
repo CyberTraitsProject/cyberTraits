@@ -9,8 +9,8 @@ from useful_functions import *
 import joblib
 import numpy as np
 
-classifier_model_n = 'DecisionTreeClassifier(max_depth=5)'
-regression_model_n = 'DecisionTreeRegressor(max_depth=3)'
+classifier_model_n = 'RandomForestClassifier(max_depth=3)'
+regression_model_n = 'RandomForestRegressor(max_depth=3)'
 
 trait_best_columns_dic = {}
 
@@ -63,24 +63,31 @@ def run_greedy_algorithm_and_choose_the_best_model(results_dir, file, trait_name
     num_columns = len(X_y_split_data[0]['X_train'].columns)
     columns_indexes = range(num_columns)
 
-    # will contain the data of the best final model
-    best_final_model_data_dic = {'test_score': - float('inf'), 'train_score': 0, 'model': 0, 'cols_indexes': []}
+    # the list of the best indexes
+    best_final_cols_indexes = []
+
+    # will contain the data of the all the models, in this shape:
+    # { test_score_1: {'train_score': train_score_1, 'models': models_1, 'cols_indexes': cols_indexes_1},
+    #   test_score_2:  {'train_score': train_score_2, 'models': models_2, 'cols_indexes': cols_indexes_2},
+    #   ...
+    #   test_score_N:  {'train_score': train_score_N, 'models': models_N, 'cols_indexes': cols_indexes_N}}
+    best_final_models_data_dic = {}
 
     # pass on every number of columns
     for i in range(num_columns):
         print(i)
 
         # will contain the data of the best model that contains the best col to add
-        best_model_data_dic = {'test_score': - float('inf'), 'train_score': 0, 'model': 0, 'cols_indexes': []}
+        best_model_data_dic = {'test_score': - float('inf'), 'train_score': 0, 'models': [], 'cols_indexes': []}
 
         # pass on every column, and check if it good to add it
         for index in columns_indexes:
 
             # if already exists - continue
-            if index in best_final_model_data_dic['cols_indexes']:
+            if index in best_final_cols_indexes:
                 continue
             else:
-                columns_indexes_list = best_final_model_data_dic['cols_indexes'] + [index]
+                columns_indexes_list = best_final_cols_indexes + [index]
 
             cur_cols_results = {'test_score_list': [], 'train_score_list': [], 'model_list': []}
 
@@ -96,11 +103,11 @@ def run_greedy_algorithm_and_choose_the_best_model(results_dir, file, trait_name
 
                 # run the machine learning model on the current data
                 if classifier:
-                    classifier_model = DecisionTreeClassifier(max_depth=5)
+                    classifier_model = RandomForestClassifier(max_depth=3)
                     test_score, train_score, model = check_model(X_curr_train, X_curr_test, y_curr_train, y_curr_test,
                                                                  classifier_model)
                 else:
-                    regression_model = DecisionTreeRegressor(max_depth=3)
+                    regression_model = RandomForestRegressor(max_depth=3)
                     test_score, train_score, model = check_model(X_curr_train, X_curr_test, y_curr_train, y_curr_test,
                                                                  regression_model)
 
@@ -113,34 +120,42 @@ def run_greedy_algorithm_and_choose_the_best_model(results_dir, file, trait_name
             if avg_test_score > best_model_data_dic['test_score']:
                 best_model_data_dic['test_score'] = avg_test_score
                 best_model_data_dic['train_score'] = (np.array(cur_cols_results['train_score_list'])).mean()
-                best_model_data_dic['model'] = cur_cols_results['model_list']
+                best_model_data_dic['models'] = cur_cols_results['model_list']
                 best_model_data_dic['cols_indexes'] = columns_indexes_list
 
-        # check if the curr final model is better that the best final model
-        if best_model_data_dic['test_score'] > best_final_model_data_dic['test_score']:
-            best_final_model_data_dic['test_score'] = best_model_data_dic['test_score']
-            best_final_model_data_dic['train_score'] = best_model_data_dic['train_score']
-            best_final_model_data_dic['model'] = best_model_data_dic['model']
-            best_final_model_data_dic['cols_indexes'] = best_model_data_dic['cols_indexes']
+        best_final_cols_indexes = best_model_data_dic['cols_indexes']
+
+        if best_model_data_dic['test_score'] not in best_final_models_data_dic:
+            best_final_models_data_dic[best_model_data_dic['test_score']] = {
+                'train_score': best_model_data_dic['train_score'],
+                'models': best_model_data_dic['models'],
+                'cols_indexes': best_model_data_dic['cols_indexes']}
 
             # write the data to the file
-            if file:
-                file.write('columns indexes: ' + str(best_final_model_data_dic['cols_indexes']) + '\n')
-                file.write('columns names: ' + str(list(X_y_split_data[0]['X_train'].columns[best_final_model_data_dic['cols_indexes']])) + '\n')
-                file.write('test score:' + str(best_final_model_data_dic['test_score']) + '\n')
-                file.write('train score:' + str(best_final_model_data_dic['train_score']) + '\n\n')
+            file.write('columns indexes: ' + str(
+                best_final_models_data_dic[best_model_data_dic['test_score']]['cols_indexes']) + '\n')
+            file.write('columns names: ' + str(
+                list(X_y_split_data[0]['X_train'].columns[
+                         best_final_models_data_dic[best_model_data_dic['test_score']]['cols_indexes']])) + '\n')
+            file.write('test score:' + str(best_model_data_dic['test_score']) + '\n')
+            file.write('train score:' + str(
+                best_final_models_data_dic[best_model_data_dic['test_score']]['train_score']) + '\n\n')
 
     # create dir to the ml pickle files, and save them there
     trait_models_dir = os.path.join(results_dir, 'traits_models')
     if not os.path.isdir(trait_models_dir):
         os.makedirs(trait_models_dir)
 
+    test_final_best_score = max(best_final_models_data_dic)
+
     for idx in range(NUM_SHUFFLES):
         cur_rs = idx * RS_DIS + START_RANDOM_STATE
-        joblib.dump(best_final_model_data_dic['model'][idx], os.path.join(trait_models_dir, f'{trait_name}_model_{cur_rs}.pkl'))
+        joblib.dump(best_final_models_data_dic[test_final_best_score]['models'][idx],
+                    os.path.join(trait_models_dir, f'{trait_name}_model_{cur_rs}.pkl'))
 
     # return the names of the best final columns
-    cols_best_names = list(X_y_split_data[0]['X_train'].columns[best_final_model_data_dic['cols_indexes']])
+    cols_best_names = list(X_y_split_data[0]['X_train'].columns[
+                               best_final_models_data_dic[test_final_best_score]['cols_indexes']])
     return cols_best_names
 
 
@@ -237,7 +252,7 @@ def machine_learning_single_model_main(specific_run=False):
         final_models_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\summary all models results\final_models'
         run_model_on_specific_cols(scaled_data_dir, final_models_dir, model, trait)
     else:
-        results_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\summary all models results\all_models\decision_tree_md_3_decision_tree_md_5_dt_3_try_final_64'
+        results_dir = r'C:\Users\onaki\CyberTraits\cyberTraits\final\summary all models results\all_models\random_forest_md_3_dt_3_64_ori'
         if not os.path.isdir(results_dir):
             os.makedirs(results_dir)
 

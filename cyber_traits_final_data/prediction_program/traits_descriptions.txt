@@ -1,16 +1,15 @@
 
 
 Extraversion:
-decision_tree_md_3_decision_tree_md_5_dt_3_try_final_64
-DecisionTreeRegressor(max_depth=3)
-6
-columns indexes: [19, 41, 40, 21, 25, 63]
-columns names: ['calls_0_night_std', 'calls_2_night_avg', 'calls_1_evening_common', 'calls_0_night_common', 'calls_0_day_common', 'texts_1_night_std']
-test score:0.04175974902979611
-train score:0.8815348792338454
+linear_regression_decision_tree_md_3_dt_3_64_ori
+LinearRegression()
+12
+['texts_1_day_avg', 'calls_1_night_common', 'calls_1_day_std', 'texts_0_night_avg', 'calls_duration_median_night_avg', 'power_state_1_night_std', 'texts_0_day_std', 'texts_1_night_avg', 'texts_0_evening_avg', 'calls_0_day_std', 'calls_2_evening_avg', 'calls_1_evening_std']
+test score:0.3887249801248663
+train score:0.9930581734778221
 
 Agreeableness:
-linear_regression_decision_tree_md_3_dt_3_try_final_64_2
+linear_regression_decision_tree_md_3_dt_3_64_ori
 LinearRegression()
 12
 ['power_state_3_day_avg', 'power_state_0_night_std', 'calls_2_night_avg', 'power_state_3_night_avg', 'calls_2_evening_avg', 'calls_percent_outgoing_day_avg', 'calls_percent_outgoing_evening_avg', 'calls_1_evening_std', 'calls_0_night_median', 'power_state_0_evening_avg', 'calls_Snight_avg', 'calls_1_night_std']
@@ -18,7 +17,7 @@ test score:0.851575058307702
 train score:0.9935641445158648
 
 Concientiousness:
-linear_regression_decision_tree_md_3_dt_3_try_final_64_2
+linear_regression_decision_tree_md_3_dt_3_64_ori
 LinearRegression()
 9
 ['power_state_3_evening_avg', 'calls_0_day_common', 'power_state_0_day_std', 'power_state_2_day_avg', 'power_state_1_night_avg', 'calls_0_day_median', 'texts_0_day_avg', 'calls_duration_median_night_avg', 'power_state_0_evening_std']
@@ -26,7 +25,7 @@ test score:0.7189683052201279
 train score:0.916293595710264
 
 Neurotism:
-linear_regression_decision_tree_md_3_dt_3_try_final_64_2
+linear_regression_decision_tree_md_3_dt_3_64_ori
 LinearRegression()
 6
 ['power_state_0_night_avg', 'calls_0_night_median', 'power_state_3_evening_avg', 'calls_0_day_common', 'calls_0_night_std', 'texts_0_evening_std']
@@ -34,7 +33,7 @@ test score:0.08324583929364568
 train score:0.6577299881731332
 
 Openess:
-linear_regression_decision_tree_md_3_dt_3_try_final_64_2
+linear_regression_decision_tree_md_3_dt_3_64_ori
 LinearRegression()
 5
 ['texts_0_evening_std', 'calls_0_day_avg', 'calls_0_evening_std', 'calls_2_day_avg', 'calls_1_duration_0_night_avg']
@@ -42,9 +41,9 @@ test score:0.7141112777984071
 train score:0.6997322302278335
 
 Style:
-linear_regression_decision_tree_md_3_dt_3_try_final_64_2
+linear_regression_decision_tree_md_3_dt_3_64_ori
 DecisionTreeClassifier(max_depth=3)
-1
-['calls_0_evening_avg']
-test score:0.6799999999999999
-train score:0.7466666666666666
+5
+['calls_0_evening_avg', 'texts_1_evening_avg', 'calls_0_evening_median', 'calls_0_evening_std', 'calls_0_night_common']
+test score:0.7
+train score:0.8333333333333334
